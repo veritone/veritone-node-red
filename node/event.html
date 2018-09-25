@@ -1,0 +1,46 @@
+<script type="text/javascript">
+  RED.nodes.registerType('event in',{
+    category: 'input',
+    color:"rgb(231, 231, 174)",
+    defaults: {
+      name: {value:""},
+      app: {value:"system"},
+      event_type: {value:""},
+      event_name: {value:""},
+      token: {value:""}
+    },
+    inputs:0,
+    outputs:1,
+    icon: "white-globe.png",
+    label: function() {
+      return this.name||"event";
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="event in">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-event"><i class="icon-tag"></i> Event</label>
+        <input type="text" id="node-input-event_name" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-type"><i class="icon-tag"></i> Type</label>
+        <input type="text" id="node-input-event_type" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-app"><i class="icon-tag"></i> App</label>
+        <input type="text" id="node-input-app" placeholder="">
+    </div>
+     <div class="form-row">
+        <label for="node-input-token"><i class="icon-tag"></i> Token</label>
+        <input type="text" id="node-input-token" placeholder="">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="event in">
+    <p>Webhook endpoint for Veritone events</p>
+</script>

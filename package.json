@@ -1,0 +1,17 @@
+{
+  "name": "veritone-node",
+  "version": "0.0.1",
+  "description": "Veritone custom nodes for node-red",
+  "dependencies": {
+    "body-parser": "1.18.3",
+    "superagent": "^4.0.0-beta.5"
+  },
+  "keywords": [
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "event": "node/event.js"
+    }
+  }
+}
