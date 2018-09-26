@@ -90,7 +90,7 @@ module.exports = function(RED) {
     if (!process.env.NODE_INSTANCE_URL) {
       throw new Error('NODE_INSTANCE_URL env variable not set')
     }
-    this.veritoneUrl = process.env.VERITONE_API_BASE_URL + '/v3/graphql';
+    this.veritoneUrl = 'https://' + process.env.VERITONE_API_BASE_URL + '/v3/graphql';
     this.url = '/' + config.id.replace('.','-');
     this.nodeUrl = process.env.NODE_INSTANCE_URL + this.url;
     this.token = config.token;
@@ -116,7 +116,7 @@ module.exports = function(RED) {
       RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
       this.status({fill:"green",shape:"dot",text:"connected"});
     }).catch((err) => {
-      this.error('failed to subscribe events');
+      this.error(err);
       this.status({fill:"red",shape:"ring",text:"disconnected"});
     })
 

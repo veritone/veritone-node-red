@@ -4,14 +4,18 @@
   "description": "Veritone custom nodes for node-red",
   "dependencies": {
     "body-parser": "1.18.3",
-    "superagent": "^4.0.0-beta.5"
+    "superagent": "^4.0.0-beta.5",
+    "axios": "^0.18.0",
+    "mustache": "^2.3.0"
   },
   "keywords": [
-    "node-red"
+    "node-red",
+    "graphql"
   ],
   "node-red": {
     "nodes": {
-      "event": "node/event.js"
+      "event": "node/event.js",
+      "graphql": "node/graphql.js"
     }
   }
 }

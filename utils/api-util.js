@@ -21,15 +21,15 @@ module.exports = function init(url, token) {
     });
   }
 
-  async function subscribeEvents(event, type, app, url) {
+  async function subscribeEvents(event, type, app, nodeUrl) {
     const query = `mutation{
 		  subscribeEvent(input:{
 		    eventName: "${event}"
 		    eventType: "${type}"
-		    application: "${app}"
+		    app: "${app}"
 		    delivery:{
           name:Webhook
-          params:{url:"${url}", encoding:"json"}
+          params:{url:"${nodeUrl}", encoding:"json"}
         }
       })
 		}`;
