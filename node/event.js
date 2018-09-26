@@ -116,7 +116,6 @@ module.exports = function(RED) {
       RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
     }).catch((err) => {
       this.error('failed to subscribe events');
-      done();
     })
 
     var maxApiRequestSize = RED.settings.apiMaxLength || '5mb';
