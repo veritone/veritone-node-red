@@ -42,12 +42,33 @@ module.exports = function init(url, token) {
         return json.data.subscribeEvent;
       }
     } catch (err) {
-      throw new Error('failed to subscribe to event', err);
+      throw new Error('failed to subscribe event', err);
+    }
+  }
+
+  async function unsubscribeEvents(id) {
+    const query = `mutation{
+		  unsubscribeEvent(id:"${id}") {
+		    id
+		  }
+    }
+		`;
+    try {
+      const data = await gqlQuery(query);
+      const json = JSON.parse(data.text);
+      if (json.errors) {
+        throw new Error('failed to subscribe to event', json.errors);
+      } else {
+        return json.data.subscribeEvent;
+      }
+    } catch (err) {
+      throw new Error('failed to unsubscribe event', err);
     }
   }
 
   return {
-    subscribeEvents: subscribeEvents
+    subscribeEvents: subscribeEvents,
+    unsubscribeEvents: unsubscribeEvents,
   }
 }
 

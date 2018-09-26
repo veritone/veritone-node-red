@@ -128,6 +128,7 @@ module.exports = function(RED) {
 
     this.on("close",function() {
       var node = this;
+      apiUtil.unsubscribeEvents(this.subscriptionId);
       RED.httpNode._router.stack.forEach(function(route,i,routes) {
         if (route.route && route.route.path === node.url && route.route.methods["post"]) {
           routes.splice(i,1);
