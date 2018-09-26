@@ -2,7 +2,7 @@
 const request = require('superagent');
 
 module.exports = function init(url, token) {
-  async function query(query) {
+  async function gqlQuery(query) {
     const headers = {
       Authorization: 'Bearer ' + token
     };
@@ -26,7 +26,7 @@ module.exports = function init(url, token) {
 		  subscribeEvent(input:{
 		    eventName: "${event}"
 		    eventType: "${type}"
-		    app: "${app}"
+		    application: "${app}"
 		    delivery:{
           name:Webhook
           params:{url:"${url}", encoding:"json"}
@@ -34,7 +34,7 @@ module.exports = function init(url, token) {
       })
 		}`;
     try {
-      const data = await this.query(query);
+      const data = await gqlQuery(query);
       const json = JSON.parse(data.text);
       if (json.errors) {
         throw new Error('failed to subscribe to event', json.errors);

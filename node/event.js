@@ -1,5 +1,5 @@
 module.exports = function(RED) {
-  var bodyParser = require("body-parser");
+  const bodyParser = require("body-parser");
 
   function rawBodyParser(req, res, next) {
     if (req.skipRawBodyParser) { next(); } // don't parse this if told to skip
@@ -90,9 +90,9 @@ module.exports = function(RED) {
     if (!process.env.NODE_INSTANCE_URL) {
       throw new Error('NODE_INSTANCE_URL env variable not set')
     }
-    this.veritoneUrl = process.env.VERITONE_API_BASE_URL + '/v3/graphiql';
-    this.url = '/events';
-    this.nodeUrl = process.env.NODE_INSTANCE_URL;
+    this.veritoneUrl = process.env.VERITONE_API_BASE_URL + '/v3/graphql';
+    this.url = '/' + config.id.replace('.','-');
+    this.nodeUrl = process.env.NODE_INSTANCE_URL + this.url;
     this.token = config.token;
     this.app = config.app;
     this.event = config.event_name;
@@ -112,8 +112,11 @@ module.exports = function(RED) {
     };
 
     apiUtil.subscribeEvents(this.event, this.type, this.app, this.nodeUrl).then((subscriptionId)=>{
-      const webhookUrl = this.nodeUrl + '/' + subscriptionId;
-      RED.httpNode.post(webhookUrl,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+      this.subscriptionId = subscriptionId;
+      RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+    }).catch((err) => {
+      this.error('failed to subscribe events');
+      done();
     })
 
     var maxApiRequestSize = RED.settings.apiMaxLength || '5mb';
