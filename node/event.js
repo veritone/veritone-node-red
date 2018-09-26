@@ -114,8 +114,10 @@ module.exports = function(RED) {
     apiUtil.subscribeEvents(this.event, this.type, this.app, this.nodeUrl).then((subscriptionId)=>{
       this.subscriptionId = subscriptionId;
       RED.httpNode.post(this.url,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+      this.status({fill:"green",shape:"dot",text:"connected"});
     }).catch((err) => {
       this.error('failed to subscribe events');
+      this.status({fill:"red",shape:"ring",text:"disconnected"});
     })
 
     var maxApiRequestSize = RED.settings.apiMaxLength || '5mb';
