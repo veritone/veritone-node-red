@@ -38,10 +38,6 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
-    <div class="form-row">
-        <label for="node-input-graphql"><i class="fa fa-bookmark"></i> <span data-i18n="graphql.label.endpoint"></span></label>
-        <input type="text" id="node-input-graphql">
-    </div>
     <div class="form-row" style="position: relative; margin-bottom: 0px;">
         <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="graphql.label.query"></span></label>
         <input type="hidden" id="node-input-template" autofocus="autofocus">
@@ -78,22 +74,21 @@
    }
   });
  }
- RED.nodes.registerType('graphql', {
-  category: 'function',
-  color: '#a6bbcf',
+ RED.nodes.registerType('VeritoneAPI', {
+  category: 'veritone',
+  color: '#2196f3',
   defaults: {
    name: {value: "", required: true },
-   graphql: {type: "graphql-server", required: true },
    format: {value:"handlebars", required: false },
    syntax: {value:"mustache", required: false },
-   template: {value:"{\n getUserById(id: 32) {\n  firstName\n  lastName\n  email\n }\n}", required: true }
+   template: {value:"{ jobs(targetId: \{\{tdoId\}\}) { records {id status createdDateTime}}}", required: true }
   },
   inputs: 1,
   outputs: 2,
-  icon: "graphql.png",
+  icon: "veritone-logo.png",
   align: "right",
   label: function() {
-   return this.name||"GraphQL";
+   return this.name || "GraphQL";
   },
   labelStyle: function() {
    return this.name ? "node_label_italic" : "";
@@ -151,5 +146,5 @@
 </script>
 
 <script type="text/x-red" data-help-name="graphql">
-    <p>This node executes a GraphQL Query or Mutation</p>
+    <p>This node executes a Veritone API GraphQL Query or Mutation</p>
 </script>
