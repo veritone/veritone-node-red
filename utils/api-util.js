@@ -1,16 +1,16 @@
-'use strict';
-const request = require('superagent');
+"use strict";
+const request = require("superagent");
 
 module.exports = function init(url, token) {
   async function gqlQuery(query) {
     const headers = {
-      Authorization: 'Bearer ' + token
+      Authorization: "Bearer " + token
     };
     return new Promise((resolve, reject) => {
       request
         .post(url)
         .set(headers)
-        .field('query', query)
+        .field("query", query)
         .end((err, data) => {
           if (!err && data) {
             resolve(data);
@@ -37,12 +37,15 @@ module.exports = function init(url, token) {
       const data = await gqlQuery(query);
       const json = JSON.parse(data.text);
       if (json.errors) {
-        throw new Error('failed to parse subscribeEvents response', json.errors);
+        throw new Error(
+          "failed to parse subscribeEvents response",
+          json.errors
+        );
       } else {
         return json.data.subscribeEvent;
       }
     } catch (err) {
-      throw new Error('failed to subscribe event', err);
+      throw new Error("failed to subscribe event", err);
     }
   }
 
@@ -57,18 +60,17 @@ module.exports = function init(url, token) {
       const data = await gqlQuery(query);
       const json = JSON.parse(data.text);
       if (json.errors) {
-        throw new Error('failed to subscribe to event', json.errors);
+        throw new Error("failed to subscribe to event", json.errors);
       } else {
         return json.data.subscribeEvent;
       }
     } catch (err) {
-      throw new Error('failed to unsubscribe event', err);
+      throw new Error("failed to unsubscribe event", err);
     }
   }
 
   return {
     subscribeEvents: subscribeEvents,
-    unsubscribeEvents: unsubscribeEvents,
-  }
-}
-
+    unsubscribeEvents: unsubscribeEvents
+  };
+};
