@@ -71,12 +71,12 @@ module.exports = function(RED) {
   function callGraphQLServer(query) {
    axios({
 	method: "POST",
-	url: this.veritoneUrl,
+	url: node.veritoneUrl,
 	data: {
 	 query: query
 	},
 	headers: {
-	 Authorization: "Bearer " + this.token
+	 Authorization: "Bearer " + node.token
 	}
    }).then(function(response) {
 		//TODO: parse graphQL errors
