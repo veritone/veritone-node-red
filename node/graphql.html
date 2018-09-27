@@ -9,30 +9,6 @@
     </div>
 </script>
 
-<script type="text/javascript">
- RED.nodes.registerType('graphql-server', {
-  category: 'config',
-  color: "rgb(218, 196, 180)",
-  defaults: {
-   endpoint: { value: "", required: true },
-   token: { value: "", required: false },
-   user: { value: "", required: false },
-   password: { value: "", required: false },
-   name: { value: "", required: false }
-  },
-  credentials: {
-   user: { type: "text" },
-   password: { type: "password" },
-   serviceTicket: { type: "password" },
-   token: { type: "password" }
-  },
-  align: 'left',
-  label: function() {
-   return this.name || this.endpoint;
-  }
- });
-</script>
-
 <script type="text/x-red" data-template-name="graphql">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
@@ -74,7 +50,7 @@
    }
   });
  }
- RED.nodes.registerType('VeritoneAPI', {
+ RED.nodes.registerType('veritoneApi', {
   category: 'veritone',
   color: '#2196f3',
   defaults: {
