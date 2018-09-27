@@ -85,7 +85,7 @@ module.exports = function(RED) {
 		  node.status({
 		   fill: "green",
 		   shape: "dot",
-		   text: RED._("graphql.status.success")
+		   text: RED._("aiware.status.success")
 		  });
 		  node.msg.payload = response.data.data;
 		  node.send(node.msg);
@@ -142,5 +142,5 @@ module.exports = function(RED) {
   });
  }
 
- RED.nodes.registerType("veritoneApi", GraphqlExecNode);
+ RED.nodes.registerType("aiware", GraphqlExecNode);
 };
