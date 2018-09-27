@@ -1,6 +1,6 @@
-###Veritone Node-Red Module
+##Veritone Node-Red Module
 
-##Testing a node module locally
+###Testing a node module locally
 
 To test a node module locally, the `npm link` command can be used. This allows you to develop the node in a local directory and have it linked into a local node-red install, as if it had been npm installed.
 

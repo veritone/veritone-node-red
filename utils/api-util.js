@@ -37,7 +37,7 @@ module.exports = function init(url, token) {
       const data = await gqlQuery(query);
       const json = JSON.parse(data.text);
       if (json.errors) {
-        throw new Error('failed to subscribe to event', json.errors);
+        throw new Error('failed to parse subscribeEvents response', json.errors);
       } else {
         return json.data.subscribeEvent;
       }
