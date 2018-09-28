@@ -1,7 +1,7 @@
 <script type="text/javascript">
   RED.nodes.registerType('event in',{
-    category: 'input',
-    color:"rgb(255, 255, 255)",
+    category: 'aiWARE',
+    color:"#b3e5fc",
     defaults: {
       name: {value:""},
       app: {value:"system"},
@@ -11,9 +11,10 @@
     },
     inputs:0,
     outputs:1,
-    icon: "veritone-logo.png",
+    icon: "veritone-logo-transparent.png",
+    paletteLabel: "event",
     label: function() {
-      return this.name||"event";
+      return this.name || "aiWARE event";
     }
   });
 </script>

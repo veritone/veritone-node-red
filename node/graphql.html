@@ -31,13 +31,13 @@
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-template-editor" ></div>
     </div>
-    <div class="form-row">
+    <!-- <div class="form-row">
         <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="aiware.label.syntax"></span></label>
         <select id="node-input-syntax" style="width:180px;">
             <option value="mustache" data-i18n="aiware.label.mustache"><span data-i18n="template.label.mustache"></span></option>
             <option value="plain" data-i18n="aiware.label.plain"><span data-i18n="template.label.plain"></span></option>
         </select>
-    </div>
+    </div> -->
 </script>
 
 <script type="text/javascript">
@@ -51,8 +51,8 @@
   });
  }
  RED.nodes.registerType('aiware', {
-  category: 'aiware',
-  color: '#6ec6ff',
+  category: 'aiWARE',
+  color: '#b3e5fc',
   defaults: {
    name: {value: "", required: true },
    format: {value:"handlebars", required: false },
@@ -61,10 +61,12 @@
   },
   inputs: 1,
   outputs: 2,
+  outputLabels: ["result","error"],
   icon: "veritone-logo-transparent.png",
+  paletteLabel: "api",
   align: "right",
   label: function() {
-   return this.name || "aiWare";
+   return this.name || "aiWARE api";
   },
   labelStyle: function() {
    return this.name ? "node_label_italic" : "";

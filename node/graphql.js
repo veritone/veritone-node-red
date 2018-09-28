@@ -76,7 +76,8 @@ module.exports = function(RED) {
 	 query: query
 	},
 	headers: {
-	 Authorization: "Bearer " + node.token
+	 Authorization: "Bearer " + node.token,
+	 "Content-Type": "application/json"
 	}
    }).then(function(response) {
 		//TODO: parse graphQL errors
@@ -109,9 +110,19 @@ module.exports = function(RED) {
 		}
 	   })
 	   .catch(function(error) {
-		RED.log.debug("error:" + error);
+		 RED.log.debug("url: " + node.veritoneUrl + " error:" + error);
+		 RED.log.debug("request: " + query);
+
+		 node.msg.payload = { error };
+		 if (error.response) {
+		  node.msg.payload.detail = error.response.data;
+		 } else if (error.request) {
+		  node.msg.payload.detail = error.request;
+		 } else {
+		  node.msg.payload.detail = error.message;
+		 }
+
 		node.status({ fill: "red", shape: "dot", text: "error" });
-		node.msg.payload = { error };
 		node.error("error: " + error);
 		node.send([null, node.msg]);
 	   });
