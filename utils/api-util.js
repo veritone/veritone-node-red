@@ -26,7 +26,7 @@ module.exports = function init(url, token) {
 		  subscribeEvent(input:{
 		    eventName: "${event}"
 		    eventType: "${type}"
-		    app: "${app}"
+		    application: "${app}"
 		    delivery:{
           name:Webhook
           params:{url:"${nodeUrl}", encoding:"json"}
