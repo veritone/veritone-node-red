@@ -1,6 +1,6 @@
 {
   "name": "veritone-node-red",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Veritone custom nodes for node-red",
   "dependencies": {
     "body-parser": "1.18.3",
