@@ -105,7 +105,7 @@ module.exports = function(RED) {
     this.veritoneUrl =
       "https://" + process.env.VERITONE_API_BASE_URL + "/v3/graphql";
     this.url = "/" + config.id.replace(".", "-");
-    this.nodeUrl = process.env.NODE_INSTANCE_URL + this.url;
+    this.nodeUrl =  "https://" + process.env.NODE_INSTANCE_URL + this.url;
     this.token = config.token;
     this.app = config.app;
     this.event = config.event_name;
