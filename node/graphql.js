@@ -58,6 +58,9 @@ module.exports = function(RED) {
   RED.nodes.createNode(this, config);
   
   this.veritoneUrl = process.env.VERITONE_API_BASE_URL + "/v3/graphql";
+  if (this.veritoneUrl.indexOf("http") !== 0) {
+    this.veritoneUrl = "https://" + this.veritoneUrl;
+  }
   this.token = process.env.API_TOKEN;
 
   this.query = config.query;
