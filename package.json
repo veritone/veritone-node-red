@@ -3,10 +3,12 @@
   "version": "0.0.3",
   "description": "Veritone custom nodes for node-red",
   "dependencies": {
-    "body-parser": "1.18.3",
-    "superagent": "^4.0.0-beta.5",
     "axios": "^0.18.0",
-    "mustache": "^2.3.0"
+    "body-parser": "1.18.3",
+    "eslint-plugin-lodash": "^3.1.0",
+    "lodash": "^4.17.4",
+    "mustache": "^2.3.0",
+    "superagent": "^4.0.0-beta.5"
   },
   "keywords": [
     "node-red",

@@ -2,6 +2,7 @@ module.exports = function(RED) {
  // https://github.com/axios/axios
  var axios = require("axios");
  var mustache = require("mustache");
+ const _ = require("lodash");
 
  function safeJSONStringify(input, maxDepth) {
   var output,
@@ -56,7 +57,7 @@ module.exports = function(RED) {
 
  function GraphqlExecNode(config) {
   RED.nodes.createNode(this, config);
-  
+
   this.veritoneUrl = process.env.VERITONE_API_BASE_URL + "/v3/graphql";
   if (this.veritoneUrl.indexOf("http") !== 0) {
     this.veritoneUrl = "https://" + this.veritoneUrl;
@@ -93,6 +94,9 @@ module.exports = function(RED) {
 		  });
 		  node.msg.payload = response.data.data;
 		  node.send(node.msg);
+		  if (!_.isEmpty(response.data.errors)) {
+		   node.error(response.data.errors)
+		  }
 		  break;
 		 default:
 		  node.status({
@@ -143,7 +147,7 @@ module.exports = function(RED) {
 
    var query;
    if (node.syntax === "mustache") {
-	query = mustache.render(node.template, msg);
+	query = mustache.render(node.template, msg.payload);
    } else {
 	query = node.template;
    }
