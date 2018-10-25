@@ -147,7 +147,7 @@ module.exports = function(RED) {
 
    var query;
    if (node.syntax === "mustache") {
-	query = mustache.render(node.template, msg.payload);
+	query = mustache.render(node.template, msg);
    } else {
 	query = node.template;
    }
