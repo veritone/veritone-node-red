@@ -3,23 +3,22 @@ module.exports = function(RED) {
 
   function KafkaEvent(config) {
     RED.nodes.createNode(this, config);
-    var node = this;
-    if (!process.env.VERITONE_API_BASE_URL) {
-      throw new Error('VERITONE_API_BASE_URL env variable not set');
-    }
-    if (!process.env.NODE_INSTANCE_URL) {
-      throw new Error('NODE_INSTANCE_URL env variable not set');
+
+    if (!process.env.CLUSTER_ID) {
+      // noop on non-edge deployments
+      return;
     }
 
+    const node = this;
     const consumerGroup = new kafka.ConsumerGroup(
       {
-        kafkaHost: config.kafka.brokers,
-        groupId: config.kafka.consumerGroupId,
+        kafkaHost: config.kafka.brokers || process.env.KAFKA_BROKERS,
+        groupId: config.kafka.consumerGroupId || process.env.KAFKA_CONSUMER_GROUP_ID,
         protocol: ['roundrobin'],
         fromOffset: 'earliest',
         maxAsyncRequests: 10
       },
-      config.kafka.topics.inputQueue
+      config.kafka.topics.inputQueue || process.env.KAFKA_TOPIC_INPUT_QUEUE
     );
 
     consumerGroup.on('error', err => {
