@@ -1,0 +1,34 @@
+<script type="text/javascript">
+    RED.nodes.registerType('create-tdo', {
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: { value: "" },
+            uri: { value: "", required: true }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "create-tdo",
+        align: "right",
+        label: function () {
+            return this.name || "create-tdo";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="create-tdo">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-globe"></i> URI</label>
+        <input type="text" id="node-input-uri" placeholder="http://">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="create-tdo">
+    <p>Create a TDO</p>
+</script>

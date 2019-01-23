@@ -1,0 +1,29 @@
+<script type="text/javascript">
+    RED.nodes.registerType('me', {
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: { value: "" }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "me",
+        align: "right",
+        label: function () {
+            return this.name || "me";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="me">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="me">
+    <p>Get me</p>
+</script>

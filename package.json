@@ -17,7 +17,9 @@
   "node-red": {
     "nodes": {
       "event": "node/event.js",
-      "graphql": "node/graphql.js"
+      "graphql": "node/graphql.js",
+      "me": "node/me.js",
+      "tdo": "node/tdo.js"
     }
   }
 }
