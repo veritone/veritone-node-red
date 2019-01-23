@@ -1,21 +1,16 @@
 
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, Stringify } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
-    const { uri } = config;
+    const { uri, isPublic, name, startDateTime } = config;
     node.on("input", function (msg) {
-        const query = `mutation {
-            createTDOWithAsset(input: {
-                startDateTime: 1476726655,
-                uri: "${uri}"
-            }) {
-                id
-            }
-        }`;
+        const command = 'createTDOWithAsset';
+        const input = { uri, isPublic, name, startDateTime };
+        const fields = `id,name`;
         const { onError, onResponse } = NewOutput(node, msg);
-        api.Query(query).then(onResponse).catch(onError);
+        api.Mutate(command, input, fields).then(onResponse).catch(onError);
     });
 }
 

@@ -4,7 +4,10 @@
         color: '#b3e5fc',
         defaults: {
             name: { value: "" },
-            uri: { value: "", required: true }
+            tdoName: { value: "" },
+            uri: { value: "", required: true },
+            startDateTime: { value: new Date().toString(), required: true },
+            isPublic: { value: false }
         },
         inputs: 1,
         outputs: 2,
@@ -13,19 +16,29 @@
         paletteLabel: "create-tdo",
         align: "right",
         label: function () {
-            return this.name || "create-tdo";
+            return "create-tdo " + this.name;
         }
     });
 </script>
 
 <script type="text/x-red" data-template-name="create-tdo">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <label for="node-input-name"><i class="icon-tag"></i> Node Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-globe"></i> URI</label>
+        <label for="node-input-startDateTime"><i class="fa fa-date"></i> Start Time</label>
+        <input type="string" id="node-input-startDateTime">
+    </div>
+    <div class="form-row">
+        <label for="node-input-uri"><i class="fa fa-globe"></i> URI</label>
         <input type="text" id="node-input-uri" placeholder="http://">
+    </div>
+    <div class="form-row">
+        <label for="node-input-isPublic">&nbsp;</label>
+        <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Is Public</span> &nbsp;
+        &nbsp;
     </div>
 </script>
 
