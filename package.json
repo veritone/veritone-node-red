@@ -6,7 +6,8 @@
     "axios": "^0.18.0",
     "body-parser": "1.18.3",
     "eslint-plugin-lodash": "^3.1.0",
-    "lodash": "^4.17.4",
+    "jsonschema": "^1.2.4",
+    "lodash": "^4.17.11",
     "mustache": "^2.3.0",
     "superagent": "^4.0.0-beta.5"
   },
@@ -19,7 +20,8 @@
       "event": "node/event.js",
       "graphql": "node/graphql.js",
       "me": "node/me.js",
-      "tdo": "node/tdo.js"
+      "tdo": "node/tdo.js",
+      "create-structure-data": "node/create-structure-data.js"
     }
   }
 }

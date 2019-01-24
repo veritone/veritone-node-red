@@ -1,0 +1,76 @@
+<script type="text/javascript">
+    RED.nodes.registerType('create-structure-data', {
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: { value: "" },
+            schemaId: { value: "", required: true },
+            dataTemplate: { value: "", required: true }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "create-structure-data",
+        align: "right",
+        label: function () {
+            return this.name || "create-structure-data";
+        },
+        oneditprepare: function () {
+            var schemaId = this.schemaId;
+            var dataTemplateEditor = RED.editor.createEditor({
+                id: 'node-input-dataTemplate-editor',
+                mode: 'ace/mode/html',
+                value: $("#node-input-dataTemplate").val()
+            });
+            $.getJSON("/veritone/schemas", function (data) {
+                var $schema = $("#node-input-schemaId");
+                $schema.append(
+                    $("<option disabled value=''> -- Select schema -- </option>")
+                        .attr("selected", schemaId ? null : "selected")
+                );
+                $.each(data, function (index, schema) {
+                    $schema.append(
+                        $("<option value='" + schema.id + "'>" + schema.name + "</option>")
+                            .attr("selected", schema.id === schemaId ? "selected" : null)
+                    );
+                });
+            });
+            this.dataTemplateEditor = dataTemplateEditor;
+            RED.library.create({
+                url: "functions",
+                type: "function",
+                editor: dataTemplateEditor,
+                fields: ['name', 'outputs']
+            });
+            this.dataTemplateEditor.focus();
+        },
+        oneditsave: function () {
+            $("#node-input-dataTemplate").val(this.dataTemplateEditor.getValue())
+            delete this.dataTemplateEditor;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="create-structure-data">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-schemaId"><i class="fa fa-random"></i> Schema</label>
+        <select id="node-input-schemaId" style="width:66%"></select>
+    </div>
+    
+    <div class="form-row" style="position: relative; margin-bottom: 0px;">
+        <label for="node-input-dataTemplate"><i class="fa fa-file-code-o"></i><span> Data</span></label>
+        <input type="hidden" id="node-input-dataTemplate" autofocus="autofocus">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-dataTemplate-editor" ></div>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="create-structure-data">
+    <p>Create structure data</p>
+</script>
