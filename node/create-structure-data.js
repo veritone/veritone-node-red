@@ -1,4 +1,3 @@
-const { validate } = require('jsonschema');
 const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const mustache = require("mustache");
@@ -9,8 +8,9 @@ function CreateNode(RED, node, config) {
     node.on("input", function (msg) {
         const command = 'createStructuredData';
         const dataString = mustache.render(dataTemplate, msg);;
-        const input = { schemaId, dataString };
-        const fields = `id,name`;
+        const data = JSON.parse(dataString);
+        const input = { schemaId, data };
+        const fields = `id`;
         const { onError, onResponse } = NewOutput(node, msg);
         api.Mutate(command, input, fields).then(onResponse).catch(onError);
     });
@@ -27,18 +27,6 @@ function registerHttpEndpoints(RED) {
             .map(r => ({ id: r.id, name: r.dataRegistry.name }))
             .sort((a, b) => a.name < b.name ? -1 : 1);
     };
-    const getDefinition = async (schemaId) => {
-        const query = `query y { schema(id: "${schemaId}") { definition } }`;
-        const res = await api.Query(query);
-        const { definition } = res.data.data.schema;
-        return definition;
-    };
-    const validateData = async (schemaId, data) => {
-        const definition = await getDefinition(schemaId);
-        const res = validate(data, definition);
-        return res.errors;
-    };
-
     RED.httpAdmin.get("/veritone/schemas", function (req, res, next) {
         getSchema().then(data => res.json(data)).catch(next);
     });

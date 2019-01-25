@@ -20,8 +20,8 @@
             var schemaId = this.schemaId;
             var dataTemplateEditor = RED.editor.createEditor({
                 id: 'node-input-dataTemplate-editor',
-                mode: 'ace/mode/html',
-                value: $("#node-input-dataTemplate").val()
+                mode: 'ace/mode/handlebars',
+                value: this.dataTemplate
             });
             $.getJSON("/veritone/schemas", function (data) {
                 var $schema = $("#node-input-schemaId");
