@@ -1,0 +1,30 @@
+<script type="text/javascript">
+    RED.nodes.registerType('V2F In',{
+      category: 'aiWARE',
+      color:"#b3e5fc",
+      defaults: {
+        name: {value:""},
+        app: {value:"system"},
+        event_type: {value:""},
+        event_name: {value:""}
+      },
+      inputs:0,
+      outputs:1,
+      icon: "veritone-logo-transparent.png",
+      paletteLabel: "V2F In",
+      label: function() {
+        return this.name || "V2F In";
+      }
+    });
+  </script>
+  
+  <script type="text/x-red" data-template-name="V2F In">
+      <div class="form-row">
+          <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+          <input type="text" id="node-input-name" placeholder="Name">
+      </div>
+  </script>
+  
+  <script type="text/x-red" data-help-name="V2F in">
+      <p>Endpoint for V2F </p>
+  </script>
