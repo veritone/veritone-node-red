@@ -20,7 +20,8 @@
     "nodes": {
       "event": "node/event.js",
       "graphql": "node/graphql.js",
-      "v2fIn": "node/v2fIn.js"
+      "v2fIn": "node/v2fIn.js",
+      "v2fOut": "node/v2fOut.js"
     }
   }
 }
