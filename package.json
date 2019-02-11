@@ -22,8 +22,8 @@
       "event": "node/event.js",
       "graphql": "node/graphql.js",
       "me": "node/me.js",
-      "tdo": "node/tdo.js",
-      "create-structure-data": "node/create-structure-data.js"
+      "create-tdo": "node/create-tdo.js",
+      "create-structure-data": "node/create-structure-data.js",
       "v2fIn": "node/v2fIn.js",
       "v2fOut": "node/v2fOut.js"
     }

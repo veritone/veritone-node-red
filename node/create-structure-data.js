@@ -30,10 +30,6 @@ function registerHttpEndpoints(RED) {
     RED.httpAdmin.get("/veritone/schemas", function (req, res, next) {
         getSchema().then(data => res.json(data)).catch(next);
     });
-    RED.httpAdmin.post("/veritone/validate", function (req, res, next) {
-        const { schemaId, data } = req.body;
-        validateData(schemaId, data).then(data => res.json(data)).catch(next);
-    });
 }
 
 module.exports = function (RED) {
