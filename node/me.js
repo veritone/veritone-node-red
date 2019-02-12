@@ -19,6 +19,7 @@ function CreateNode(RED, node, config) {
 
 module.exports = function (RED) {
     const NodeName = 'me';
+    RED.httpAdmin.get('/ready', (req, res) => res.status(200).end('ok'));
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
         CreateNode(RED, this, config);
