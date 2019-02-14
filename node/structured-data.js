@@ -4,7 +4,7 @@ const mustache = require("mustache");
 
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
-    const { schemaId, dataTemplate } = config;
+    const { schemaId, dataTemplate, action } = config;
     node.on("input", function (msg) {
         const command = 'createStructuredData';
         const dataString = mustache.render(dataTemplate, msg);;
@@ -34,7 +34,7 @@ function registerHttpEndpoints(RED) {
 
 module.exports = function (RED) {
     registerHttpEndpoints(RED);
-    const NodeName = 'create-structure-data';
+    const NodeName = 'structured-data';
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
         CreateNode(RED, this, config);
