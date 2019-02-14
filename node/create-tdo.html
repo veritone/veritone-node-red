@@ -7,7 +7,8 @@
             tdoName: { value: "" },
             uri: { value: "", required: true },
             startDateTime: { value: new Date().toString(), required: true },
-            isPublic: { value: false }
+            isPublic: { value: false },
+            updateStopDateTimeFromAsset: { value: true }
         },
         inputs: 1,
         outputs: 2,
@@ -38,6 +39,12 @@
         <label for="node-input-isPublic">&nbsp;</label>
         <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
         <span>Is Public</span> &nbsp;
+        &nbsp;
+    </div>
+    <div class="form-row">
+        <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
+        <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Update Stop Time From Asset</span> &nbsp;
         &nbsp;
     </div>
 </script>

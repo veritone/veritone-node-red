@@ -4,10 +4,16 @@ const { NewOutput } = require('../lib/output');
 
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
-    const { uri, isPublic, name, startDateTime } = config;
+    const {
+        uri, isPublic, name,
+        startDateTime, updateStopDateTimeFromAsset
+    } = config;
     node.on("input", function (msg) {
         const command = 'createTDOWithAsset';
-        const input = { uri, isPublic, name, startDateTime };
+        const input = {
+            uri, isPublic, name, 
+            startDateTime, updateStopDateTimeFromAsset
+        };
         const fields = `id,name`;
         const { onError, onResponse } = NewOutput(node, msg);
         api.Mutate(command, input, fields).then(onResponse).catch(onError);
