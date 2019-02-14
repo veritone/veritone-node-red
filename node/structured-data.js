@@ -1,5 +1,6 @@
 const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
+const { replay } = require('../lib/pipe');
 const mustache = require("mustache");
 
 function CreateNode(RED, node, config) {
@@ -20,15 +21,16 @@ function registerHttpEndpoints(RED) {
     const api = NewVeritoneAPI(RED.log.debug);
     const getSchema = async () => {
         const query = `query y { schemas { records { id, dataRegistry { name } } } }`;
-        const res = await api.Query(query)
+        const res = await api.Query(query);
         const { records } = res.data.data.schemas;
         if (!records) { return []; }
         return records
             .map(r => ({ id: r.id, name: r.dataRegistry.name }))
             .sort((a, b) => a.name < b.name ? -1 : 1);
     };
+    const cachedGetSchema = replay(getSchema);
     RED.httpAdmin.get("/veritone/schemas", function (req, res, next) {
-        getSchema().then(data => res.json(data)).catch(next);
+        cachedGetSchema().then(data => res.json(data)).catch(next);
     });
 }
 
