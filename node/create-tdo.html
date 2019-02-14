@@ -1,12 +1,47 @@
+<script type="text/x-red" data-template-name="create-tdo">
+    <div class="form-row">
+        <label for="node-input-uri"><i class="fa fa-link"></i> URI</label>
+        <input type="text" id="node-input-uri" style="width:70%">
+        <input type="hidden" id="node-input-uriType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-startDateTime"><i class="fa fa-date"></i> Start Time</label>
+        <input type="string" id="node-input-startDateTime">
+    </div>
+    <div class="form-row">
+        <label for="node-input-stopDateTime"><i class="fa fa-date"></i> Stop Time</label>
+        <input type="string" id="node-input-stopDateTime">
+    </div>
+    <div class="form-row">
+        <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
+        <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Update Stop Time From Asset</span> &nbsp;
+        &nbsp;
+    </div>
+    
+    <div class="form-row">
+        <label for="node-input-isPublic">&nbsp;</label>
+        <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span>Is Public</span> &nbsp;
+        &nbsp;
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Node Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
 <script type="text/javascript">
     RED.nodes.registerType('create-tdo', {
         category: 'aiWARE',
         color: '#b3e5fc',
         defaults: {
             name: { value: "" },
-            tdoName: { value: "" },
             uri: { value: "", required: true },
-            startDateTime: { value: new Date().toString(), required: true },
+            uriType: { value: "str" },
+            startDateTime: { value: "" },
+            stopDateTime: { value: "" },
             isPublic: { value: false },
             updateStopDateTimeFromAsset: { value: true }
         },
@@ -18,35 +53,29 @@
         align: "right",
         label: function () {
             return "create-tdo " + this.name;
+        },
+        oneditprepare: function () {
+            var $uriType = $("#node-input-uriType");
+            $("#node-input-uri").typedInput({
+                default: 'str',
+                typeField: $uriType,
+                types: ['str', 'msg']
+            });
+            var property = (!this.complete || (this.complete === "false")) ? "payload" : this.complete + "";
+            $uriType.typedInput('type', this.uriType);
+            $uriType.typedInput('value', this.uri);
+            $uriType.on('change', function () {
+                if ($uriType.typedInput('type') === 'msg' &&
+                    $uriType.typedInput('value') === ''
+                ) {
+                    $uriType.typedInput('value', 'payload');
+                }
+            });
+        },
+        oneditsave: function () {
+            $("#node-input-uri").val($("#node-input-uriType").typedInput('value'));
         }
     });
-</script>
-
-<script type="text/x-red" data-template-name="create-tdo">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Node Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-startDateTime"><i class="fa fa-date"></i> Start Time</label>
-        <input type="string" id="node-input-startDateTime">
-    </div>
-    <div class="form-row">
-        <label for="node-input-uri"><i class="fa fa-globe"></i> URI</label>
-        <input type="text" id="node-input-uri" placeholder="http://">
-    </div>
-    <div class="form-row">
-        <label for="node-input-isPublic">&nbsp;</label>
-        <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span>Is Public</span> &nbsp;
-        &nbsp;
-    </div>
-    <div class="form-row">
-        <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
-        <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span>Update Stop Time From Asset</span> &nbsp;
-        &nbsp;
-    </div>
 </script>
 
 <script type="text/x-red" data-help-name="create-tdo">
