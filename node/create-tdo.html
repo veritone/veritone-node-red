@@ -72,20 +72,11 @@
         },
         oneditprepare: function () {
             var $uriType = $("#node-input-uriType");
+            $("#node-input-uri").val(this.uri);
             $("#node-input-uri").typedInput({
                 default: 'str',
                 typeField: $uriType,
                 types: ['str', 'msg']
-            });
-            var property = (!this.complete || (this.complete === "false")) ? "payload" : this.complete + "";
-            $uriType.typedInput('type', this.uriType);
-            $uriType.typedInput('value', this.uri);
-            $uriType.on('change', function () {
-                if ($uriType.typedInput('type') === 'msg' &&
-                    $uriType.typedInput('value') === ''
-                ) {
-                    $uriType.typedInput('value', 'payload');
-                }
             });
         },
         oneditsave: function () {
