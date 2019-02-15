@@ -13,6 +13,19 @@
         <input type="string" id="node-input-stopDateTime">
     </div>
     <div class="form-row">
+        <label for="node-input-tdoName"> TDO Name</label>
+        <input type="string" id="node-input-tdoName">
+    </div>
+    <div class="form-row">
+        <label for="node-input-sourceId"> Source ID</label>
+        <input type="string" id="node-input-sourceId">
+    </div>
+    <div class="form-row">
+        <label for="node-input-contentType"> Content Type</label>
+        <input type="string" id="node-input-contentType">
+    </div>
+    
+    <div class="form-row">
         <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
         <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
         <span>Update Stop Time From Asset</span> &nbsp;
@@ -38,6 +51,9 @@
         color: '#b3e5fc',
         defaults: {
             name: { value: "" },
+            tdoName: { value: "" },
+            sourceId: { value: "" },
+            contentType: { value: "" },
             uri: { value: "", required: true },
             uriType: { value: "str" },
             startDateTime: { value: "" },

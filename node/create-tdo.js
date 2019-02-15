@@ -5,7 +5,8 @@ const { NewOutput } = require('../lib/output');
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
     const {
-        uri, uriType, isPublic, name,
+        uri, uriType, isPublic, tdoName: name,
+        sourceId, contentType,
         startDateTime, updateStopDateTimeFromAsset
     } = config;
     const getUri = uriType === 'str' ? () => uri : (msg) => msg[uri];
@@ -14,6 +15,7 @@ function CreateNode(RED, node, config) {
         const uri = getUri(msg);
         const input = {
             uri, isPublic, name,
+            sourceId, contentType,
             startDateTime, updateStopDateTimeFromAsset
         };
         const fields = `id,name`;
