@@ -22,6 +22,9 @@ function registerHttpEndpoints(RED) {
     const getSchema = async () => {
         const query = `query y { schemas { records { id, dataRegistry { name } } } }`;
         const res = await api.Query(query);
+        if (!res.data.data.schemas) {
+            return [];
+        }
         const { records } = res.data.data.schemas;
         if (!records) { return []; }
         return records

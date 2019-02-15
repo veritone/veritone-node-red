@@ -57,27 +57,24 @@
 
 <script type="text/x-red" data-template-name="structured-data">
     <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-action"> Action</label>
         <select id="node-input-action" style="width:66%">
-            <option value="query">Query</option>
             <option value="create">Create</option>
         </select>
     </div>
+    
     <div class="form-row">
         <label for="node-input-schemaId"><i class="fa fa-random"></i> Schema</label>
         <select id="node-input-schemaId" style="width:66%"></select>
     </div>
-    
-    <div class="form-row" style="position: relative; margin-bottom: 0px;">
-        <label for="node-input-dataTemplate"><i class="fa fa-file-code-o"></i><span> Data</span></label>
-        <input type="hidden" id="node-input-dataTemplate" autofocus="autofocus">
-    </div>
+
+    <div> Data </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 250px;" class="node-text-editor" id="node-input-dataTemplate-editor" ></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
