@@ -1,60 +1,3 @@
-<script type="text/javascript">
-    RED.nodes.registerType('structured-data', {
-        category: 'aiWARE',
-        color: '#b3e5fc',
-        defaults: {
-            name: { value: "" },
-            action: { value: "create" },
-            schemaId: { value: "", required: true },
-            dataTemplate: { value: "", required: true }
-        },
-        inputs: 1,
-        outputs: 2,
-        outputLabels: ["result", "error"],
-        icon: "veritone-logo-transparent.png",
-        paletteLabel: "structured-data",
-        align: "right",
-        label: function () {
-            return this.name || "structured-data";
-        },
-        oneditprepare: function () {
-            var schemaId = this.schemaId;
-            var dataTemplateEditor = RED.editor.createEditor({
-                id: 'node-input-dataTemplate-editor',
-                mode: 'ace/mode/handlebars',
-                value: this.dataTemplate
-            });
-            $.getJSON("/veritone/schemas", function (data) {
-                var $schema = $("#node-input-schemaId");
-                $schema.append(
-                    $("<option disabled value=''> -- Select schema -- </option>")
-                        .attr("selected", schemaId ? null : "selected")
-                );
-                $.each(data, function (index, schema) {
-                    $schema.append(
-                        $("<option value='" + schema.id + "'>" + schema.name + "</option>")
-                            .attr("selected", schema.id === schemaId ? "selected" : null)
-                    );
-                });
-            }, function (error) {
-                console.log(error);
-            });
-            this.dataTemplateEditor = dataTemplateEditor;
-            RED.library.create({
-                url: "functions",
-                type: "function",
-                editor: dataTemplateEditor,
-                fields: ['name', 'outputs']
-            });
-            this.dataTemplateEditor.focus();
-        },
-        oneditsave: function () {
-            $("#node-input-dataTemplate").val(this.dataTemplateEditor.getValue())
-            delete this.dataTemplateEditor;
-        }
-    });
-</script>
-
 <script type="text/x-red" data-template-name="structured-data">
     <div class="form-row">
         <select id="node-input-action" style="width:66%">
@@ -67,11 +10,10 @@
         <select id="node-input-schemaId" style="width:66%"></select>
     </div>
 
-    <div> Data </div>
-    <div class="form-row node-text-editor-row">
-        <div style="height: 250px;" class="node-text-editor" id="node-input-dataTemplate-editor" ></div>
-    </div>
-
+    <h5> Fields and Values </h5>
+    <div id="node-input-data-props"></div>
+    
+    <hr/>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -80,4 +22,134 @@
 
 <script type="text/x-red" data-help-name="structured-data">
     <p>Structured data</p>
+</script>
+
+<script type="text/javascript">
+    (function () {
+
+        var schemaCache;
+        var inputTypes = {
+            "string": "text",
+            "number": "number",
+            "boolean": "checkbox",
+            "dateTime": "datetime"
+        };
+        var icons = {
+            // for type
+            "string": "fa-quote-right",
+            "boolean": "fa-check-square",
+            "datetime": "fa-clock",
+            "number": "fa-hashtag",
+            // for field
+            "rate": "fa-hashtag",
+            "spotId": "fa-hashtag",
+            "orderItemsList": "fa-list",
+        };
+
+        function getSchemas(done) {
+            if (schemaCache) {
+                done(schemaCache);
+                return;
+            }
+            $.getJSON("/veritone/schemas", function (data) {
+                schemaCache = data;
+                done(schemaCache);
+            }, console.log);
+        }
+
+        function getProps(schemaId, done) {
+            $.getJSON("/veritone/schemas/" + schemaId, function (data) {
+                done(data);
+            });
+        }
+
+        function buildPropForm(prop) {
+            var field = prop.field;
+            var propId = `node-input-data-prop-${prop.field}`;
+            var title = prop.title || field;
+            var type = prop.type;
+            var inputType = inputTypes[type] || 'text';
+            var icon = icons[field] || icons[type] || icons["string"];
+            var div = document.createElement('div');
+            div.innerHTML = `<div class="form-row">
+                        <label for="${propId}" title="${title}" style="width:180px">
+                            <i class="fa ${icon}"></i> ${title}
+                        </label>
+                        <input type="${inputType}" style="width:200px" id="${propId}">
+                    </div>`;
+            return div;
+        }
+
+        RED.nodes.registerType('structured-data', {
+            category: 'aiWARE',
+            color: '#b3e5fc',
+            defaults: {
+                name: { value: "" },
+                action: { value: "create" },
+                schemaId: { value: "", required: true },
+                dataProps: { value: {} }
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "structured-data",
+            align: "right",
+            label: function () {
+                return this.name || "structured-data";
+            },
+            oneditprepare: function () {
+                var schemaId = this.schemaId;
+                var $schema = $("#node-input-schemaId");
+                var dataProps;
+                var that = this;
+                var dataPropsEl = document.getElementById("node-input-data-props");
+                function showProps(props) {
+                    dataPropsEl.innerHTML = '';
+                    props.forEach((prop) => {
+                        var field = prop.field;
+                        var div = buildPropForm(prop);
+                        var input = div.getElementsByTagName('input')[0];
+                        if (dataProps[field] !== undefined) {
+                            input.value = dataProps[field];
+                        }
+                        input.onchange = () => {
+                            dataProps[field] = input.value;
+                        }
+                        dataPropsEl.append(div);
+                    });
+                }
+
+                function handleProps(init) {
+                    if (init) {
+                        dataProps = that.dataProps || {};
+                    } else {
+                        dataProps = {};
+                    }
+                    dataPropsEl['__dataProps'] = dataProps;
+                    var schemaId = $schema.val();
+                    if (!schemaId) { return; }
+                    getProps(schemaId, showProps);
+                }
+                getSchemas(function (data) {
+                    $schema.append(
+                        $("<option disabled value=''> -- Select schema -- </option>")
+                            .attr("selected", schemaId ? null : "selected")
+                    );
+                    $.each(data, function (index, s) {
+                        $schema.append(
+                            $("<option value='" + s.id + "'>" + s.name + "</option>")
+                        );
+                    });
+                    $schema.val(schemaId);
+                    handleProps(true);
+                    $schema.on("change", handleProps);
+                });
+            },
+            oneditsave: function () {
+                this.schemaId = $("#node-input-schemaId").val();
+                this.dataProps = document.getElementById("node-input-data-props")["__dataProps"];
+            }
+        });
+    })();
 </script>
