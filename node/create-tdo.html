@@ -68,7 +68,7 @@
         paletteLabel: "create-tdo",
         align: "right",
         label: function () {
-            return "create-tdo " + this.name;
+            return this.name || this.tdoName || "create-tdo";
         },
         oneditprepare: function () {
             var $uriType = $("#node-input-uriType");
