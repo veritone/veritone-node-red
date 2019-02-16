@@ -59,9 +59,7 @@
                 return;
             }
             $.getJSON("/veritone/schemas", function (data) {
-                if (data) {
-                    schemaCache = data;
-                }
+                if (data) { schemaCache = data; }
                 done(data);
             }, console.log);
         }
@@ -72,38 +70,18 @@
                 return;
             }
             $.getJSON("/veritone/schemas/" + schemaId, function (data) {
-                if (data) {
-                    definitions[schemaId] = data;
-                }
+                if (data) { definitions[schemaId] = data; }
                 done(data);
             });
         }
 
-        function getActionDataNode() {
-            return $("#input-for-selected-action");
-        }
+        function getActionDataNode() { return $("#input-for-selected-action"); }
 
-        function newLoadingNode(text) {
-            return $(
-                `<div>${text} <i class="fa fa-spinner"></i></div>`
-            );
-        }
+        function newLoadingNode(text) { return $(`<div>${text} <i class="fa fa-spinner"></i></div>`); }
 
-        function setActionData(action, data) {
-            getActionDataNode().data(`data-${action}`, data);
-        }
+        function setActionData(action, data) { getActionDataNode().data(action, data); }
 
-        function getActionData(action) {
-            return getActionDataNode().data(`data-${action}`);
-        }
-
-        function setActionParams(action, params) {
-            getActionDataNode().data(`params-${action}`, params);
-        }
-
-        function getActionParams(action) {
-            return getActionDataNode().data(`params-${action}`);
-        }
+        function getActionData(action) { return getActionDataNode().data(action); }
 
         function newSchemaSelectNode(data, schemaId) {
             var $schema = $(`<select id="input-schemaId" style="width:66%"></select>`);
@@ -125,25 +103,19 @@
             return div;
         }
 
-        function newSchemaDataFormNode() {
-            return $(`<div id="input-schema-data-form"></div>`);
-        }
+        function newSchemaDataFormNode() { return $(`<div id="input-schema-data-form"></div>`); }
 
-        function getSchemaDataFormNode() {
-            return $("#input-schema-data-form");
-        }
+        function getSchemaDataFormNode() { return $("#input-schema-data-form"); }
 
-        function getSchemaIdNode() {
-            return $("#input-schemaId");
-        }
+        function getSchemaIdNode() { return $("#input-schemaId"); }
 
-        function showCreateForm(that) {
+        function showCreateForm(actionData) {
             var editingProps = {};
-            var params = Object.assign({}, that.actionParams.create);
+            var params = Object.assign({}, actionData.params);
             var schemaId = params.schemaId;
-            var createProps = editingProps[schemaId] = Object.assign({}, that.actionData.create);
-            setActionData("create", editingProps);
-            setActionParams("create", params);
+            var createProps = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("create", data);
 
             function buildPropForm(prop) {
                 var field = prop.field;
@@ -200,14 +172,14 @@
             });
         }
 
-        function showQueryForm(that) {
+        function showQueryForm(actionData) {
             var $schema = $("#input-schemaId");
-            var params = Object.assign({}, that.actionParams.query);
+            var params = Object.assign({}, actionData.params);
             var schemaId = params.schemaId;
             var editingProps = {};
-            var queryFields = editingProps[schemaId] = Object.assign({}, that.actionData.query);
-            setActionData("query", editingProps);
-            setActionParams("query", params);
+            var queryFields = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("query", data);
 
             function showPropsForQuery(props) {
                 getSchemaDataFormNode().empty().append(
@@ -271,7 +243,6 @@
                 name: { value: "" },
                 action: { value: "create" },
                 actionData: { value: {} },
-                actionParams: { value: {} }
             },
             inputs: 1,
             outputs: 2,
@@ -284,30 +255,31 @@
             },
             oneditprepare: function () {
                 var that = this;
-                this.actionData = this.actionData || {};
-                this.actionParams = this.actionParams || {};
-
                 $("#node-input-action").on("change", function () {
                     var action = $(this).val();
+                    var actionData = that.actionData[action] || {};
                     if (action === "create") {
-                        showCreateForm(that);
+                        showCreateForm(actionData);
                     } else if (action === "query") {
-                        showQueryForm(that);
+                        showQueryForm(actionData);
                     }
                 });
             },
             oneditsave: function () {
                 var action = $("#node-input-action").val();
-                var data = getActionData(action);
-                var params = getActionParams(action);
+                var editingData = getActionData(action);
+                var actionData = this.actionData[action] || {};
+                var props = editingData.props;
+                var params = editingData.params;
                 var schemaId = params.schemaId;
-                if (data && data[schemaId]) {
-                    // console.log("saving action data", action, data[schemaId]);
-                    this.actionData[action] = data[schemaId];
+                if (props && props[schemaId]) {
+                    actionData.props = props[schemaId];
                 }
                 if (params) {
-                    this.actionParams[action] = Object.assign({}, params);
+                    actionData.params = Object.assign({}, params);
                 }
+                console.log(actionData);
+                this.actionData[action] = actionData;
             }
         });
     })();

@@ -47,15 +47,14 @@ async function getDefinition(api, schemaId) {
     return records.sort((a, b) => a.title < b.title ? -1 : 1);
 };
 
-function makeData(action, actionData, msg) {
-    const dataTemplate = actionData[action];
+function makeData(action, props, msg) {
     if (action === "query" || action === "delete") {
-        return dataTemplate;
+        return props;
     }
     const res = {};
-    if (!dataTemplate) { return res; }
-    Object.keys(dataTemplate).forEach(k => {
-        res[k] = mustache.render(dataTemplate[k], msg);
+    if (!props) { return res; }
+    Object.keys(props).forEach(k => {
+        res[k] = mustache.render(props[k], msg);
     });
     return res;
 };
@@ -67,10 +66,10 @@ const actionWorkers = {
 
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
-    const { action, actionData, actionParams } = config;
-    const params = actionParams[action];
+    const { action, actionData } = config;
+    const { params, props } = actionData[action];
     node.on("input", function (msg) {
-        const data = makeData(action, actionData, msg);
+        const data = makeData(action, props, msg);
         const { onError, onSuccess } = NewOutput(node, msg);
         const worker = actionWorkers[action];
         if (!worker) {
