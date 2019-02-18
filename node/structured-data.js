@@ -2,7 +2,17 @@ const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const mustache = require("mustache");
 
-async function getStructuredData(api, { schemaId, limit = 0 }, fields) {
+const render = (tmpl, obj) => mustache.render(tmpl, obj);
+const renderObj = (props, msg) => {
+    const res = {};
+    if (!props) { return res; }
+    Object.keys(props).forEach(k => {
+        res[k] = render(props[k], msg);
+    });
+    return res;
+};
+
+async function getStructuredData(api, msg, { schemaId, limit = 0 }, fields) {
     const query = `query { structuredDataObjects(schemaId: "${schemaId}", limit: ${limit}) { records { id data } } }`;
     const { structuredDataObjects: res } = await api.Query(query);
     if (!res || !res.records) { return []; }
@@ -18,13 +28,23 @@ async function getStructuredData(api, { schemaId, limit = 0 }, fields) {
     })
 }
 
-async function createStructuredData(api, { schemaId }, data) {
+async function createStructuredData(api, msg, { schemaId }, props) {
     const command = 'createStructuredData';
+    const data = renderObj(props, msg);
     const input = { schemaId, data };
     const fields = `id`;
     const { createStructuredData: res } = await api.Mutate(command, input, fields);
     return res;
 }
+
+async function deleteStructuredData(api, msg, { schemaId, recordId }, props) {
+    const id = render(recordId, msg);
+    const command = 'deleteStructuredData';
+    const input = { schemaId, id };
+    const fields = `id`;
+    const { deleteStructuredData: res } = await api.Mutate(command, input, fields);
+    return res;
+};
 
 async function getSchemas(api) {
     const query = `query y { schemas { records { id, dataRegistry { name } } } }`;
@@ -47,36 +67,25 @@ async function getDefinition(api, schemaId) {
     return records.sort((a, b) => a.title < b.title ? -1 : 1);
 };
 
-function makeData(action, props, msg) {
-    if (action === "query" || action === "delete") {
-        return props;
-    }
-    const res = {};
-    if (!props) { return res; }
-    Object.keys(props).forEach(k => {
-        res[k] = mustache.render(props[k], msg);
-    });
-    return res;
-};
 
 const actionWorkers = {
     create: createStructuredData,
-    query: getStructuredData
-}
+    query: getStructuredData,
+    delete: deleteStructuredData,
+};
 
 function CreateNode(RED, node, config) {
     const api = NewVeritoneAPI(RED.log.debug);
     const { action, actionData } = config;
     const { params, props } = actionData[action];
     node.on("input", function (msg) {
-        const data = makeData(action, props, msg);
         const { onError, onSuccess } = NewOutput(node, msg);
         const worker = actionWorkers[action];
         if (!worker) {
             node.error(`unknown selected action ${action}`);
             return;
         }
-        worker(api, params, data).then(onSuccess).catch(onError);
+        worker(api, msg, params, props).then(onSuccess).catch(onError);
     });
 }
 

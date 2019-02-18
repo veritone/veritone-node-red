@@ -3,6 +3,7 @@
         <select id="node-input-action" style="width:66%">
             <option value="create">Create</option>
             <option value="query">Query</option>
+            <option value="delete">Delete</option>
         </select>
     </div>
     
@@ -173,7 +174,6 @@
         }
 
         function showQueryForm(actionData) {
-            var $schema = $("#input-schemaId");
             var params = Object.assign({}, actionData.params);
             var schemaId = params.schemaId;
             var editingProps = {};
@@ -208,7 +208,7 @@
                 getProps(newSchemaId, showPropsForQuery);
             }
 
-            function newLimitNode() {
+            function newRecordIdNode() {
 
                 var limitInput = $(`<input type="number" min="0" id="input-limit">`);
                 limitInput.val(params.limit || 0);
@@ -228,10 +228,47 @@
             getSchemas(function (data) {
                 getActionDataNode().empty().append(
                     newSchemaSelectNode(data, schemaId),
-                    newLimitNode(),
+                    newRecordIdNode(),
                     newSchemaDataFormNode()
                 );
                 getSchemaIdNode().on("change", handlePropsForQuery);
+                getSchemaIdNode().change();
+            });
+        }
+
+        function showDeleteForm(actionData) {
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var data = { params: params };
+            setActionData("delete", data);
+            function newRecordIdNode() {
+                var recordIdInput = $(`<input id="input-record-id">`);
+                recordIdInput.val(params.recordId);
+                recordIdInput.on("change", function () {
+                    params.recordId = recordIdInput.val();
+                });
+
+                var recordIdNode = $(`<div class="form-row">
+                <label for="input-record-id">
+                    <i class="fa fa-record"></i> Record ID
+                </label>
+                </div>`).append(recordIdInput);
+                return recordIdNode;
+            }
+
+            function handlePropsForDelete() {
+                var newSchemaId = getSchemaIdNode().val();
+                if (!newSchemaId) { return; }
+                params.schemaId = newSchemaId;
+            }
+
+            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
+            getSchemas(function (data) {
+                getActionDataNode().empty().append(
+                    newSchemaSelectNode(data, schemaId),
+                    newRecordIdNode()
+                );
+                getSchemaIdNode().on("change", handlePropsForDelete);
                 getSchemaIdNode().change();
             });
         }
@@ -262,6 +299,8 @@
                         showCreateForm(actionData);
                     } else if (action === "query") {
                         showQueryForm(actionData);
+                    } else if (action === "delete") {
+                        showDeleteForm(actionData);
                     }
                 });
             },
@@ -278,7 +317,6 @@
                 if (params) {
                     actionData.params = Object.assign({}, params);
                 }
-                console.log(actionData);
                 this.actionData[action] = actionData;
             }
         });
