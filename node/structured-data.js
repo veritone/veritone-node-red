@@ -3,9 +3,8 @@ const { NewOutput } = require('../lib/output');
 const mustache = require("mustache");
 
 const render = (tmpl, obj) => mustache.render(tmpl, obj);
-const renderObj = (props, msg) => {
+const renderObj = (props = {}, msg) => {
     const res = {};
-    if (!props) { return res; }
     Object.keys(props).forEach(k => {
         res[k] = render(props[k], msg);
     });
@@ -38,40 +37,29 @@ async function createStructuredData(api, msg, { schemaId }, props) {
 }
 
 async function deleteStructuredData(api, msg, { schemaId, recordId }, props) {
-    const id = render(recordId, msg);
     const command = 'deleteStructuredData';
+    const id = render(recordId, msg);
     const input = { schemaId, id };
     const fields = `id`;
     const { deleteStructuredData: res } = await api.Mutate(command, input, fields);
     return res;
 };
 
-async function getSchemas(api) {
-    const query = `query y { schemas { records { id, dataRegistry { name } } } }`;
-    const { schemas } = await api.Query(query);
-    const records = schemas ? schemas.records : null;
-    if (!records) { return []; }
-    return records
-        .map(r => ({ id: r.id, name: r.dataRegistry.name }))
-        .sort((a, b) => a.name < b.name ? -1 : 1);
-};
-
-async function getDefinition(api, schemaId) {
-    const query = `query y { schema(id: "${schemaId}") { definition } }`;
-    const { schema } = await api.Query(query);
-    const { definition: { properties } } = schema;
-    const records = Object.keys(properties).map(field => {
-        const { type, title, description, examples } = properties[field];
-        return { field, type, title };
-    });
-    return records.sort((a, b) => a.title < b.title ? -1 : 1);
-};
-
+async function updateStructuredData(api, msg, { schemaId, recordId }, props) {
+    const command = 'createStructuredData';
+    const id = render(recordId, msg);
+    const data = renderObj(props, msg);
+    const input = { schemaId, id, data };
+    const fields = `id`;
+    const { createStructuredData: res } = await api.Mutate(command, input, fields);
+    return res;
+}
 
 const actionWorkers = {
     create: createStructuredData,
     query: getStructuredData,
     delete: deleteStructuredData,
+    update: updateStructuredData,
 };
 
 function CreateNode(RED, node, config) {
@@ -91,6 +79,27 @@ function CreateNode(RED, node, config) {
 
 function registerHttpEndpoints(RED) {
     const api = NewVeritoneAPI(RED.log.debug);
+    async function getSchemas(api) {
+        const query = `query y { schemas { records { id, dataRegistry { name } } } }`;
+        const { schemas } = await api.Query(query);
+        const records = schemas ? schemas.records : null;
+        if (!records) { return []; }
+        return records
+            .map(r => ({ id: r.id, name: r.dataRegistry.name }))
+            .sort((a, b) => a.name < b.name ? -1 : 1);
+    };
+
+    async function getDefinition(api, schemaId) {
+        const query = `query y { schema(id: "${schemaId}") { definition } }`;
+        const { schema } = await api.Query(query);
+        const { definition: { properties } } = schema;
+        const records = Object.keys(properties).map(field => {
+            const { type, title, description, examples } = properties[field];
+            return { field, type, title };
+        });
+        return records.sort((a, b) => a.title < b.title ? -1 : 1);
+    };
+
     RED.httpAdmin.get("/veritone/schemas", function (req, res, next) {
         getSchemas(api).then(data => res.json(data)).catch(next);
     });

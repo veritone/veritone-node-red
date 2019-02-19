@@ -3,6 +3,7 @@
         <select id="node-input-action" style="width:66%">
             <option value="create">Create</option>
             <option value="query">Query</option>
+            <option value="update">Update</option>
             <option value="delete">Delete</option>
         </select>
     </div>
@@ -76,9 +77,24 @@
             });
         }
 
-        function getActionDataNode() { return $("#input-for-selected-action"); }
+        function newInputRecordIdNode(obj) {
+            var input = $(`<input id="input-recordId">`);
+            input.val(obj.recordId);
+            input.on("change", function () {
+                obj.recordId = input.val();
+            });
+
+            var formNode = $(`<div class="form-row">
+                <label for="input-recordId">
+                    <i class="fa fa-record"></i> Record ID
+                </label>
+                </div>`).append(input);
+            return formNode;
+        }
 
         function newLoadingNode(text) { return $(`<div>${text} <i class="fa fa-spinner"></i></div>`); }
+
+        function getActionDataNode() { return $("#input-for-selected-action"); }
 
         function setActionData(action, data) { getActionDataNode().data(action, data); }
 
@@ -110,15 +126,22 @@
 
         function getSchemaIdNode() { return $("#input-schemaId"); }
 
-        function showCreateForm(actionData) {
-            var editingProps = {};
-            var params = Object.assign({}, actionData.params);
-            var schemaId = params.schemaId;
-            var createProps = editingProps[schemaId] = Object.assign({}, actionData.props);
-            var data = { props: editingProps, params: params };
-            setActionData("create", data);
+        function loadSchemaForm(done) {
+            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
+            getSchemas(done);
+        }
 
-            function buildPropForm(prop) {
+        function onSchemaChange(cb) {
+            getSchemaIdNode().on("change", function () {
+                var newSchemaId = getSchemaIdNode().val();
+                if (!newSchemaId) { return; }
+                cb(newSchemaId);
+            });
+            getSchemaIdNode().change();
+        }
+
+        function buildPropForm(obj) {
+            return function (prop) {
                 var field = prop.field;
                 var propId = `input-data-prop-${prop.field}`;
                 var title = prop.title || field;
@@ -126,9 +149,9 @@
                 var inputType = inputTypes[type] || 'text';
                 var icon = icons[field] || icons[type] || icons["string"];
                 var input = $(`<input type="${inputType}" style="width:200px" id="${propId}">`);
-                input.val(createProps[field]);
+                input.val(obj[field]);
                 input.on("change", function () {
-                    createProps[field] = input.val();
+                    obj[field] = input.val();
                 });
                 var div = $(`<div class="form-row">
                 <label for="${propId}" title="${title}" style="width:180px">
@@ -138,38 +161,37 @@
                 div.append(input);
                 return div;
             }
+        }
 
-            function showCreateProps(props) {
-                if (props.length < 1) {
-                    getSchemaDataFormNode().empty().append("No schema found");
-                    return;
-                }
-                getSchemaDataFormNode().empty().append(`<div class="form-row">
-                <label style="width:180px"><b>Fields</b></label>
-                <label><b>Values</b></label>
-                </div>
-                `).append(props.map(buildPropForm));
-            }
-
-            function handlePropsForCreate() {
-                var newSchemaId = getSchemaIdNode().val();
-                if (!newSchemaId) { return; }
+        function showCreateForm(actionData) {
+            var editingProps = {};
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var createProps = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("create", data);
+            var buildPropFormForCreate = buildPropForm(createProps);
+            function handlePropsForCreate(newSchemaId) {
                 params.schemaId = newSchemaId;
                 getSchemaDataFormNode().empty().append(
                     newLoadingNode("loading structured data form")
                 );
                 createProps = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
-                getProps(newSchemaId, showCreateProps);
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(`<div class="form-row">
+                    <label style="width:180px"><b>Fields</b></label>
+                    <label><b>Values</b></label>
+                    </div>
+                    `).append(props.map(buildPropFormForCreate));
+                });
             }
 
-            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
-            getSchemas(function (data) {
+            loadSchemaForm(function (data) {
                 getActionDataNode().empty().append(
                     newSchemaSelectNode(data, schemaId),
                     newSchemaDataFormNode()
                 );
-                getSchemaIdNode().on("change", handlePropsForCreate);
-                getSchemaIdNode().change();
+                onSchemaChange(handlePropsForCreate);
             });
         }
 
@@ -181,35 +203,30 @@
             var data = { props: editingProps, params: params };
             setActionData("query", data);
 
-            function showPropsForQuery(props) {
-                getSchemaDataFormNode().empty().append(
-                    "<h5> Properties</h5>",
-                    props.map(function (prop) {
-                        var field = prop.field;
-                        var fieldNode = $(`<span> ${field}</span>`);
-                        var checkbox = $(`<input type="checkbox" style="vertical-align: baseline">`);
-                        checkbox.prop("checked", queryFields[field]);
-                        checkbox.on("change", function () {
-                            queryFields[field] = checkbox.prop("checked");
-                        });
-                        return $("<div></div>").append(checkbox, fieldNode);
-                    })
-                );
-            }
-
-            function handlePropsForQuery() {
-                var newSchemaId = getSchemaIdNode().val();
-                if (!newSchemaId) { return; }
+            function handlePropsForQuery(newSchemaId) {
                 params.schemaId = newSchemaId;
                 queryFields = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
                 getSchemaDataFormNode().empty().append(
                     newLoadingNode("loading available queryFields")
                 );
-                getProps(newSchemaId, showPropsForQuery);
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(
+                        "<h5> Properties</h5>",
+                        props.map(function (prop) {
+                            var field = prop.field;
+                            var fieldNode = $(`<span> ${field}</span>`);
+                            var checkbox = $(`<input type="checkbox" style="vertical-align: baseline">`);
+                            checkbox.prop("checked", queryFields[field]);
+                            checkbox.on("change", function () {
+                                queryFields[field] = checkbox.prop("checked");
+                            });
+                            return $("<div></div>").append(checkbox, fieldNode);
+                        })
+                    );
+                });
             }
 
-            function newRecordIdNode() {
-
+            function newInputLimitNode() {
                 var limitInput = $(`<input type="number" min="0" id="input-limit">`);
                 limitInput.val(params.limit || 0);
                 limitInput.on("change", function () {
@@ -224,15 +241,47 @@
                 return limitNode;
             }
 
-            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
-            getSchemas(function (data) {
+            loadSchemaForm(function (data) {
                 getActionDataNode().empty().append(
                     newSchemaSelectNode(data, schemaId),
-                    newRecordIdNode(),
+                    newInputLimitNode(),
                     newSchemaDataFormNode()
                 );
-                getSchemaIdNode().on("change", handlePropsForQuery);
-                getSchemaIdNode().change();
+                onSchemaChange(handlePropsForQuery);
+            });
+        }
+
+        function showUpdateForm(actionData) {
+            var editingProps = {};
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var updateProps = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("update", data);
+            var buildPropFormForUpdate = buildPropForm(updateProps);
+
+            function handlePropsForUpdate(newSchemaId) {
+                params.schemaId = newSchemaId;
+                getSchemaDataFormNode().empty().append(
+                    newLoadingNode("loading structured data form")
+                );
+                updateProps = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(`<div class="form-row">
+                    <label style="width:180px"><b>Fields</b></label>
+                    <label><b>Values</b></label>
+                    </div>
+                    `).append(props.map(buildPropFormForUpdate));
+                });
+            }
+
+            loadSchemaForm(function (data) {
+                getActionDataNode().empty().append(
+                    newInputRecordIdNode(params),
+                    newSchemaSelectNode(data, schemaId),
+                    newSchemaDataFormNode()
+                );
+                onSchemaChange(handlePropsForUpdate);
             });
         }
 
@@ -241,35 +290,15 @@
             var schemaId = params.schemaId;
             var data = { params: params };
             setActionData("delete", data);
-            function newRecordIdNode() {
-                var recordIdInput = $(`<input id="input-record-id">`);
-                recordIdInput.val(params.recordId);
-                recordIdInput.on("change", function () {
-                    params.recordId = recordIdInput.val();
-                });
-
-                var recordIdNode = $(`<div class="form-row">
-                <label for="input-record-id">
-                    <i class="fa fa-record"></i> Record ID
-                </label>
-                </div>`).append(recordIdInput);
-                return recordIdNode;
-            }
-
-            function handlePropsForDelete() {
-                var newSchemaId = getSchemaIdNode().val();
-                if (!newSchemaId) { return; }
+            function handlePropsForDelete(newSchemaId) {
                 params.schemaId = newSchemaId;
             }
-
-            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
-            getSchemas(function (data) {
+            loadSchemaForm(function (data) {
                 getActionDataNode().empty().append(
                     newSchemaSelectNode(data, schemaId),
-                    newRecordIdNode()
+                    newInputRecordIdNode(params)
                 );
-                getSchemaIdNode().on("change", handlePropsForDelete);
-                getSchemaIdNode().change();
+                onSchemaChange(handlePropsForDelete);
             });
         }
 
@@ -301,6 +330,8 @@
                         showQueryForm(actionData);
                     } else if (action === "delete") {
                         showDeleteForm(actionData);
+                    } else if (action === "update") {
+                        showUpdateForm(actionData);
                     }
                 });
             },
