@@ -4,7 +4,7 @@ const { NewOutput } = require('../lib/output');
 
 async function createTDOWithAsset(api, input) {
     const command = 'createTDOWithAsset';
-    const fields = `id,name`;
+    const fields = `id name assets { records { id assetType signedUri } }`;
     const { createTDOWithAsset: res } = api.Mutate(command, input, fields);
     return res;
 }
