@@ -60,7 +60,7 @@
 
         var definitions = {};
 
-        function getSchemas(done) {
+        function getSchemas(done, fail) {
             if (schemaCache) {
                 done(schemaCache);
                 return;
@@ -68,10 +68,12 @@
             $.getJSON("/veritone/schemas", function (data) {
                 if (data) { schemaCache = data; }
                 done(data);
-            }, console.log);
+            }).fail(function (e) {
+                fail(e.responseJSON.message);
+            });
         }
 
-        function getProps(schemaId, done) {
+        function getProps(schemaId, done, fail) {
             if (definitions[schemaId]) {
                 done(definitions[schemaId]);
                 return;
@@ -79,6 +81,8 @@
             $.getJSON("/veritone/schemas/" + schemaId, function (data) {
                 if (data) { definitions[schemaId] = data; }
                 done(data);
+            }).fail(function (e) {
+                fail(e.responseJSON.message);
             });
         }
 
@@ -98,6 +102,7 @@
         }
 
         function newLoadingNode(text) { return $(`<div>${text} <i class="fa fa-spinner"></i></div>`); }
+        function newMessageNode(text) { return $(`<div>${text} <i class="fa fa-warn"></i></div>`); }
 
         function getActionDataNode() { return $("#input-for-selected-action"); }
 
@@ -131,9 +136,17 @@
 
         function getSchemaIdNode() { return $("#input-schemaId"); }
 
+        function showLoadSchemaFail() {
+            getActionDataNode().empty().append(newMessageNode("Loading schema failed: " + message));
+        }
+
+        function showLoadPropFail() {
+            getSchemaDataFormNode().empty().append(newMessageNode("Loading schema props failed: " + message));
+        }
+
         function loadSchemaForm(done) {
             getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
-            getSchemas(done);
+            getSchemas(done, showLoadSchemaFail);
         }
 
         function onSchemaChange(cb) {
@@ -188,7 +201,7 @@
                     <label><b>Values</b></label>
                     </div>
                     `).append(props.map(buildPropFormForCreate));
-                });
+                }, showLoadPropFail);
             }
 
             loadSchemaForm(function (data) {
@@ -228,7 +241,7 @@
                             return $("<div></div>").append(checkbox, fieldNode);
                         })
                     );
-                });
+                }, showLoadPropFail);
             }
 
             function newInputLimitNode() {
@@ -277,7 +290,7 @@
                     <label><b>Values</b></label>
                     </div>
                     `).append(props.map(buildPropFormForUpdate));
-                });
+                }, showLoadPropFail);
             }
 
             loadSchemaForm(function (data) {

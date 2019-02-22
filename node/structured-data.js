@@ -1,5 +1,6 @@
 const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
+const { NewExpressOutput } = require('../lib/http');
 const mustache = require("mustache");
 
 const render = (tmpl, obj) => mustache.render(tmpl, obj);
@@ -100,17 +101,21 @@ function registerHttpEndpoints(RED) {
         return records.sort((a, b) => a.title < b.title ? -1 : 1);
     };
 
-    RED.httpAdmin.get("/veritone/schemas", function (req, res, next) {
-        getSchemas(api).then(data => res.json(data)).catch(next);
+    RED.httpAdmin.get("/veritone/schemas", function (req, res) {
+        const { onSuccess, onError } = NewExpressOutput(res);
+        getSchemas(api).then(onSuccess).catch(onError);
     });
-    RED.httpAdmin.get("/veritone/schemas/:id", function (req, res, next) {
+    RED.httpAdmin.get("/veritone/schemas/:id", function (req, res) {
         const { id: schemaId } = req.params;
-        getDefinition(api, schemaId).then(data => res.json(data)).catch(next);
+        const { onSuccess, onError } = NewExpressOutput(res);
+        getDefinition(api, schemaId).then(onSuccess).catch(onError);
     });
 }
 
 module.exports = function (RED) {
-    registerHttpEndpoints(RED);
+    if (RED.settings.httpNodeRoot !== false) {
+        registerHttpEndpoints(RED);
+    }
     const NodeName = 'structured-data';
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
