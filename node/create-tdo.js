@@ -1,11 +1,11 @@
-
 const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
+const { get } = require('lodash');
 
 async function createTDOWithAsset(api, input) {
     const command = 'createTDOWithAsset';
     const fields = `id name assets { records { id assetType signedUri } }`;
-    const { createTDOWithAsset: res } = api.Mutate(command, input, fields);
+    const { createTDOWithAsset: res } = await api.Mutate(command, input, fields);
     return res;
 }
 
@@ -16,7 +16,7 @@ function CreateNode(RED, node, config) {
         sourceId, contentType,
         startDateTime, updateStopDateTimeFromAsset
     } = config;
-    const getUri = uriType === 'str' ? () => uri : (msg) => msg[uri];
+    const getUri = uriType === 'str' ? () => uri : (msg) => get(msg, uri);
     node.on("input", function (msg) {
         const uri = getUri(msg);
         const input = {
@@ -25,8 +25,8 @@ function CreateNode(RED, node, config) {
             startDateTime, updateStopDateTimeFromAsset
         };
 
-        const { onError, onResponse } = NewOutput(node, msg);
-        createTDOWithAsset(api, input).then(onResponse).catch(onError);
+        const { onError, onSuccess } = NewOutput(node, msg);
+        createTDOWithAsset(api, input).then(onSuccess).catch(onError);
     });
 }
 
