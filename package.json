@@ -23,7 +23,7 @@
       "graphql": "node/graphql.js",
       "me": "node/me.js",
       "create-tdo": "node/create-tdo.js",
-      "create-structure-data": "node/create-structure-data.js",
+      "structured-data": "node/structured-data.js",
       "v2fIn": "node/v2fIn.js",
       "v2fOut": "node/v2fOut.js"
     }

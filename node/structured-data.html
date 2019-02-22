@@ -1,0 +1,373 @@
+<script type="text/x-red" data-template-name="structured-data">
+    <div class="form-row">
+        <select id="node-input-action" style="width:66%">
+            <option value="create">Create</option>
+            <option value="query">Query</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
+        </select>
+    </div>
+    
+
+    <div id="input-for-selected-action">
+        
+    </div>
+    
+    <hr/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<style>
+    .structured-data-query-checkbox {
+        vertical-align: baseline;
+        width: 20px;
+    }
+</style>
+
+<script type="text/x-red" data-help-name="structured-data">
+    <p>Structured data</p>
+</script>
+
+<script type="text/javascript">
+    (function () {
+
+        var schemaCache;
+        var inputTypes = {
+            "string": "text",
+            "number": "number",
+            "boolean": "checkbox",
+            "dateTime": "datetime"
+        };
+        var icons = {
+            // type
+            "number": "fa-hashtag",
+            "integer": "fa-superscript",
+            "boolean": "fa-check-square",
+            "string": "fa-quote-right",
+            "array": "fa-list-ol",
+            "object": "fa-object-group",
+            // string format
+            "datetime": "fa-clock",
+            "geopoint": "fa-map-pin",
+            // specific field
+            "rate": "fa-hashtag",
+            "spotId": "fa-hashtag",
+            "orderItemsList": "fa-list",
+        };
+
+        var definitions = {};
+
+        function getSchemas(done, fail) {
+            if (schemaCache) {
+                done(schemaCache);
+                return;
+            }
+            $.getJSON("/veritone/schemas", function (data) {
+                if (data) { schemaCache = data; }
+                done(data);
+            }).fail(function (e) {
+                fail(e.responseJSON.message);
+            });
+        }
+
+        function getProps(schemaId, done, fail) {
+            if (definitions[schemaId]) {
+                done(definitions[schemaId]);
+                return;
+            }
+            $.getJSON("/veritone/schemas/" + schemaId, function (data) {
+                if (data) { definitions[schemaId] = data; }
+                done(data);
+            }).fail(function (e) {
+                fail(e.responseJSON.message);
+            });
+        }
+
+        function newInputRecordIdNode(obj) {
+            var input = $(`<input id="input-recordId">`);
+            input.val(obj.recordId);
+            input.on("change", function () {
+                obj.recordId = input.val();
+            });
+
+            var formNode = $(`<div class="form-row">
+                <label for="input-recordId">
+                    <i class="fa fa-record"></i> Record ID
+                </label>
+                </div>`).append(input);
+            return formNode;
+        }
+
+        function newLoadingNode(text) { return $(`<div>${text} <i class="fa fa-spinner"></i></div>`); }
+        function newMessageNode(text) { return $(`<div>${text} <i class="fa fa-warn"></i></div>`); }
+
+        function getActionDataNode() { return $("#input-for-selected-action"); }
+
+        function setActionData(action, data) { getActionDataNode().data(action, data); }
+
+        function getActionData(action) { return getActionDataNode().data(action); }
+
+        function newSchemaSelectNode(data, schemaId) {
+            var $schema = $(`<select id="input-schemaId" style="width:66%"></select>`);
+            var div = $(`<div class="form-row">
+            <label for="input-schemaId"><i class="fa fa-random"></i> Schema</label>
+            </div>
+            `);
+            $schema.append(
+                $("<option disabled value=''> -- Select schema -- </option>")
+                    .attr("selected", schemaId ? null : "selected")
+            );
+            $.each(data, function (index, s) {
+                $schema.append(
+                    $("<option value='" + s.id + "'>" + s.name + "</option>")
+                );
+            });
+            $schema.val(schemaId);
+            div.append($schema);
+            return div;
+        }
+
+        function newSchemaDataFormNode() { return $(`<div id="input-schema-data-form"></div>`); }
+
+        function getSchemaDataFormNode() { return $("#input-schema-data-form"); }
+
+        function getSchemaIdNode() { return $("#input-schemaId"); }
+
+        function showLoadSchemaFail() {
+            getActionDataNode().empty().append(newMessageNode("Loading schema failed: " + message));
+        }
+
+        function showLoadPropFail() {
+            getSchemaDataFormNode().empty().append(newMessageNode("Loading schema props failed: " + message));
+        }
+
+        function loadSchemaForm(done) {
+            getActionDataNode().empty().append(newLoadingNode("Loading schema list"));
+            getSchemas(done, showLoadSchemaFail);
+        }
+
+        function onSchemaChange(cb) {
+            getSchemaIdNode().on("change", function () {
+                var newSchemaId = getSchemaIdNode().val();
+                if (!newSchemaId) { return; }
+                cb(newSchemaId);
+            });
+            getSchemaIdNode().change();
+        }
+
+        function buildPropForm(obj) {
+            return function (prop) {
+                var field = prop.field;
+                var propId = `input-data-prop-${prop.field}`;
+                var title = prop.title || field;
+                var type = prop.type;
+                var inputType = inputTypes[type] || 'text';
+                var icon = icons[field] || icons[type] || icons["string"];
+                var input = $(`<input type="${inputType}" style="width:200px" id="${propId}">`);
+                input.val(obj[field]);
+                input.on("change", function () {
+                    obj[field] = input.val();
+                });
+                var div = $(`<div class="form-row">
+                <label for="${propId}" title="${title}" style="width:180px">
+                    <i class="fa ${icon}"></i> ${title}
+                </label>
+                    </div> `);
+                div.append(input);
+                return div;
+            }
+        }
+
+        function showCreateForm(actionData) {
+            var editingProps = {};
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var createProps = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("create", data);
+            var buildPropFormForCreate = buildPropForm(createProps);
+            function handlePropsForCreate(newSchemaId) {
+                params.schemaId = newSchemaId;
+                getSchemaDataFormNode().empty().append(
+                    newLoadingNode("loading structured data form")
+                );
+                createProps = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(`<div class="form-row">
+                    <label style="width:180px"><b>Fields</b></label>
+                    <label><b>Values</b></label>
+                    </div>
+                    `).append(props.map(buildPropFormForCreate));
+                }, showLoadPropFail);
+            }
+
+            loadSchemaForm(function (data) {
+                getActionDataNode().empty().append(
+                    newSchemaSelectNode(data, schemaId),
+                    newSchemaDataFormNode()
+                );
+                onSchemaChange(handlePropsForCreate);
+            });
+        }
+
+        function showQueryForm(actionData) {
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var editingProps = {};
+            var queryFields = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("query", data);
+
+            function handlePropsForQuery(newSchemaId) {
+                params.schemaId = newSchemaId;
+                queryFields = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
+                getSchemaDataFormNode().empty().append(
+                    newLoadingNode("loading available queryFields")
+                );
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(
+                        "<h5> Properties</h5>",
+                        props.map(function (prop) {
+                            var field = prop.field;
+                            var fieldNode = $(`<span> ${field}</span>`);
+                            var checkbox = $(`<input type="checkbox" style="vertical-align: baseline">`);
+                            checkbox.prop("checked", queryFields[field]);
+                            checkbox.on("change", function () {
+                                queryFields[field] = checkbox.prop("checked");
+                            });
+                            return $("<div></div>").append(checkbox, fieldNode);
+                        })
+                    );
+                }, showLoadPropFail);
+            }
+
+            function newInputLimitNode() {
+                var limitInput = $(`<input type="number" min="0" id="input-limit">`);
+                limitInput.val(params.limit || 0);
+                limitInput.on("change", function () {
+                    params.limit = limitInput.val();
+                });
+
+                var limitNode = $(`<div class="form-row">
+                <label for="input-limit">
+                    <i class="fa fa-limit"></i> Limit
+                </label>
+                </div>`).append(limitInput);
+                return limitNode;
+            }
+
+            loadSchemaForm(function (data) {
+                getActionDataNode().empty().append(
+                    newSchemaSelectNode(data, schemaId),
+                    newInputLimitNode(),
+                    newSchemaDataFormNode()
+                );
+                onSchemaChange(handlePropsForQuery);
+            });
+        }
+
+        function showUpdateForm(actionData) {
+            var editingProps = {};
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var updateProps = editingProps[schemaId] = Object.assign({}, actionData.props);
+            var data = { props: editingProps, params: params };
+            setActionData("update", data);
+            var buildPropFormForUpdate = buildPropForm(updateProps);
+
+            function handlePropsForUpdate(newSchemaId) {
+                params.schemaId = newSchemaId;
+                getSchemaDataFormNode().empty().append(
+                    newLoadingNode("loading structured data form")
+                );
+                updateProps = editingProps[newSchemaId] = editingProps[newSchemaId] || {};
+                getProps(newSchemaId, function (props) {
+                    getSchemaDataFormNode().empty().append(`<div class="form-row">
+                    <label style="width:180px"><b>Fields</b></label>
+                    <label><b>Values</b></label>
+                    </div>
+                    `).append(props.map(buildPropFormForUpdate));
+                }, showLoadPropFail);
+            }
+
+            loadSchemaForm(function (data) {
+                getActionDataNode().empty().append(
+                    newInputRecordIdNode(params),
+                    newSchemaSelectNode(data, schemaId),
+                    newSchemaDataFormNode()
+                );
+                onSchemaChange(handlePropsForUpdate);
+            });
+        }
+
+        function showDeleteForm(actionData) {
+            var params = Object.assign({}, actionData.params);
+            var schemaId = params.schemaId;
+            var data = { params: params };
+            setActionData("delete", data);
+            function handlePropsForDelete(newSchemaId) {
+                params.schemaId = newSchemaId;
+            }
+            loadSchemaForm(function (data) {
+                getActionDataNode().empty().append(
+                    newSchemaSelectNode(data, schemaId),
+                    newInputRecordIdNode(params)
+                );
+                onSchemaChange(handlePropsForDelete);
+            });
+        }
+
+        RED.nodes.registerType('structured-data', {
+            category: 'aiWARE',
+            color: '#b3e5fc',
+            defaults: {
+                name: { value: "" },
+                action: { value: "create" },
+                actionData: { value: {} },
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "structured-data",
+            align: "right",
+            label: function () {
+                return this.name || "structured-data";
+            },
+            oneditprepare: function () {
+                var that = this;
+                $("#node-input-action").on("change", function () {
+                    var action = $(this).val();
+                    var actionData = that.actionData[action] || {};
+                    if (action === "create") {
+                        showCreateForm(actionData);
+                    } else if (action === "query") {
+                        showQueryForm(actionData);
+                    } else if (action === "delete") {
+                        showDeleteForm(actionData);
+                    } else if (action === "update") {
+                        showUpdateForm(actionData);
+                    }
+                });
+            },
+            oneditsave: function () {
+                var action = $("#node-input-action").val();
+                var editingData = getActionData(action);
+                var actionData = this.actionData[action] || {};
+                var props = editingData.props;
+                var params = editingData.params;
+                var schemaId = params.schemaId;
+                if (props && props[schemaId]) {
+                    actionData.props = props[schemaId];
+                }
+                if (params) {
+                    actionData.params = Object.assign({}, params);
+                }
+                this.actionData[action] = actionData;
+            }
+        });
+    })();
+</script>
