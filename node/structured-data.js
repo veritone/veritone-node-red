@@ -31,7 +31,7 @@ async function createStructuredData(api, msg, { schemaId }, props) {
     const command = 'createStructuredData';
     const data = renderObj(props, msg);
     const input = { schemaId, data };
-    const fields = `id`;
+    const fields = `id schemaId`;
     const { createStructuredData: res } = await api.Mutate(command, input, fields);
     return res;
 }
@@ -50,7 +50,7 @@ async function updateStructuredData(api, msg, { schemaId, recordId }, props) {
     const id = render(recordId, msg);
     const data = renderObj(props, msg);
     const input = { schemaId, id, data };
-    const fields = `id`;
+    const fields = `id data`;
     const { createStructuredData: res } = await api.Mutate(command, input, fields);
     return res;
 }
