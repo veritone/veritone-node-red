@@ -1,0 +1,209 @@
+<script type="text/x-red" data-template-name="engine-processing">
+    <div class="form-row" id="input-targetId">
+        <label for="node-input-targetId"><i class="fa fa-hashtag"></i> Target ID</label>
+        <input type="text" id="node-input-targetId" placeholder="UUID">
+    </div>
+    <div id="input-engine-tasks"></div>
+    <button id="btn-add-engine-task">Add task</button>
+    <hr/>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="engine-processing">
+    <p>Engine Processing</p>
+</script>
+
+<style>
+    .engine-processing-task-form {
+        border: 1px solid #aaa;
+        padding: 0 6px;
+        margin: 6px 0;
+    }
+</style>
+<script type="text/javascript">
+    (function () {
+        function getAndCache(url) {
+            var cache = null;
+            return function (done) {
+                if (cache) {
+                    done(cache);
+                    return;
+                }
+                $.getJSON(url, function (data) {
+                    if (data) { cache = data; }
+                    done(data);
+                }, console.log);
+            }
+        }
+        var engineCaches = {};
+        var getEngineCategories = getAndCache("/veritone/engineCategories");
+        var getLibraries = getAndCache("/veritone/libraries");
+        function getEngines(engineCategoryId, done) {
+            if (engineCaches[engineCategoryId]) {
+                done(engineCaches[engineCategoryId]);
+                return;
+            }
+            $.getJSON("/veritone/engines?categoryId=" + engineCategoryId, function (data) {
+                if (data) { engineCaches[engineCategoryId] = data; }
+                done(data);
+            });
+        }
+
+        function newLoadingNode(text) {
+            return $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
+        }
+
+        function newSelectNode(data, title) {
+            var node = $("<select></select>");
+            node.append(
+                $("<option disabled value=''> -- " + title + " -- </option>")
+                    .attr("selected", "selected")
+            );
+            $.each(data, function (index, s) {
+                node.append(
+                    $("<option value='" + s.id + "'>" + s.name + "</option>")
+                );
+            });
+            return node;
+        }
+
+        function showEngineCategoryForm(parent, engineCategoryId, onChange) {
+            var loading = newLoadingNode("Loading engine category");
+            parent.append(loading);
+            getEngineCategories(function (data) {
+                var engineCategoryInput = newSelectNode(data, "Select engine category");
+                var engineCategoryForm = $(`<div class="form-row" id="input-engineCategoryId"></div>`).append(
+                    `<label for="node-input-engineCategoryId"><i class="fa fa-cogs"></i> Category</label>`,
+                    engineCategoryInput
+                );
+                engineCategoryInput.on("change", function () {
+                    if (engineCategoryInput.val()) {
+                        onChange(engineCategoryInput.val());
+                    }
+                });
+                loading.remove();
+                parent.append(engineCategoryForm);
+                engineCategoryInput.val(engineCategoryId);
+                engineCategoryInput.change();
+            });
+        }
+
+        function showEngineForm(parent, engineCategoryId, engineId, onChange) {
+            var loading = newLoadingNode("Loading engines in the selected category")
+            parent.append(loading);
+            getEngines(engineCategoryId, function (data) {
+                var engineInput = newSelectNode(data, "Select engine");
+                var engineForm = $(`<div class="form-row" id="input-engineId"></div>`).append(
+                    `<label for="node-input-engineId"><i class="fa fa-cog"></i> Engine</label>`,
+                    engineInput
+                );
+                engineInput.on("change", function () {
+                    if (engineInput.val()) {
+                        onChange(engineInput.val());
+                    }
+                });
+                loading.remove();
+                parent.append(engineForm);
+                engineInput.val(engineId);
+                engineInput.change();
+            });
+        }
+
+        function newTaskNode(task, index) {
+            var taskNode = $(`<div class="engine-processing-task-form"> <b>Task ${index + 1}</b></div>`);
+            var engineCategoryNode = $('<div></div>');
+            var engineNode = $('<div></div>');
+            taskNode.append(engineCategoryNode, engineNode);
+            showEngineCategoryForm(engineCategoryNode, task.engineCategoryId, function (newEngineCategoryId) {
+                if (newEngineCategoryId != task.engineCategoryId) {
+                    task.engineCategoryId = newEngineCategoryId;
+                    task.engineId = '';
+                }
+                engineNode.empty();
+                showEngineForm(engineNode, newEngineCategoryId, task.engineId, function (newEngineId) {
+                    task.engineId = newEngineId;
+                });
+            });
+            return taskNode;
+        }
+
+        function isEngineRequireLibrary(engines, engineId) {
+            var requireLibrary = false;
+            var i, d;
+            for (i = 0; i < engines.length; i++) {
+                d = engines[i];
+                if (d.id === engineId && d.libraryRequired) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        RED.nodes.registerType('engine-processing', {
+            category: 'aiWARE',
+            color: '#b3e5fc',
+            defaults: {
+                name: { value: "" },
+                targetId: { value: "", required: true },
+                tasks: { value: [] }
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "engine-processing",
+            align: "right",
+            label: function () {
+                return this.name || "engine-processing";
+            },
+            oneditprepare: function () {
+                var tasks = [].concat(this.tasks);
+                var taskListNode = $("#input-engine-tasks");
+                if (tasks.length === 0) {
+                    tasks.push({});
+                }
+                taskListNode.data("tasks", tasks);
+                var addTaskButton = $("#btn-add-engine-task");
+                function setButtonVisibility() {
+                    if (tasks.length < 5) {
+                        addTaskButton.show();
+                    } else {
+                        addTaskButton.hide();
+                    }
+                }
+                function showTask(index, task) {
+                    var taskNode = newTaskNode(task, index);
+                    var removeButton = $(`<i class="fa fa-trash"></i>`);
+                    removeButton.on("click", function () {
+                        var message = "Do you want to delete task?";
+                        if (confirm(message)) {
+                            taskNode.empty();
+                            tasks.splice(index, 1);
+                        }
+                    });
+                    taskNode.prepend(removeButton);
+                    taskListNode.append(taskNode);
+                }
+                $.each(tasks, showTask);
+                addTaskButton.on("click", function () {
+                    var task = {};
+                    tasks.push(task);
+                    showTask(tasks.length - 1, task);
+                    setButtonVisibility();
+                });
+                setButtonVisibility();
+            },
+            oneditsave: function () {
+                var taskListNode = $("#input-engine-tasks");
+                var tasks = taskListNode.data("tasks");
+                if (tasks) {
+                    this.tasks = tasks;
+                    console.log(tasks);
+                }
+            }
+        });
+    })();
+</script>

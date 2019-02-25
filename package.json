@@ -24,6 +24,7 @@
       "me": "node/me.js",
       "create-tdo": "node/create-tdo.js",
       "structured-data": "node/structured-data.js",
+      "engine": "node/engine.js",
       "v2fIn": "node/v2fIn.js",
       "v2fOut": "node/v2fOut.js"
     }
