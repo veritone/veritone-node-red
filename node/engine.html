@@ -70,6 +70,20 @@
             return node;
         }
 
+        function findById(data, id) {
+            var i, d;
+            for (i = 0; i < data.length; i++) {
+                if (data[i].id === id) {
+                    return data[i];
+                }
+            }
+            return null;
+        }
+
+        function isLibraryRequired(engine) {
+            return engine.libraryRequired;
+        }
+
         function showEngineCategoryForm(parent, engineCategoryId, onChange) {
             var loading = newLoadingNode("Loading engine category");
             parent.append(loading);
@@ -80,8 +94,9 @@
                     engineCategoryInput
                 );
                 engineCategoryInput.on("change", function () {
-                    if (engineCategoryInput.val()) {
-                        onChange(engineCategoryInput.val());
+                    var category = findById(data, engineCategoryInput.val());
+                    if (category) {
+                        onChange(category);
                     }
                 });
                 loading.remove();
@@ -101,8 +116,9 @@
                     engineInput
                 );
                 engineInput.on("change", function () {
-                    if (engineInput.val()) {
-                        onChange(engineInput.val());
+                    var engine = findById(data, engineInput.val());
+                    if (engine) {
+                        onChange(engine);
                     }
                 });
                 loading.remove();
@@ -112,34 +128,55 @@
             });
         }
 
+        function showLibraryForm(parent, libraryId, onChange) {
+            var loading = newLoadingNode("Loading libraries ")
+            parent.append(loading);
+            getLibraries(function (data) {
+                var libraryInput = newSelectNode(data, "Select library");
+                var libraryForm = $(`<div class="form-row"></div>`).append(
+                    `<label for="node-input-libraryId"><i class="fa fa-cog"></i> Library</label>`,
+                    libraryInput
+                );
+                libraryInput.on("change", function () {
+                    var library = findById(data, libraryInput.val());
+                    if (library) {
+                        onChange(library);
+                    }
+                });
+                loading.remove();
+                parent.append(libraryForm);
+                libraryInput.val(libraryId);
+                libraryInput.change();
+            });
+        }
+
         function newTaskNode(task, index) {
             var taskNode = $(`<div class="engine-processing-task-form"> <b>Task ${index + 1}</b></div>`);
             var engineCategoryNode = $('<div></div>');
             var engineNode = $('<div></div>');
             taskNode.append(engineCategoryNode, engineNode);
-            showEngineCategoryForm(engineCategoryNode, task.engineCategoryId, function (newEngineCategoryId) {
-                if (newEngineCategoryId != task.engineCategoryId) {
-                    task.engineCategoryId = newEngineCategoryId;
+            showEngineCategoryForm(engineCategoryNode, task.engineCategoryId, function (category) {
+                if (category.id != task.engineCategoryId) {
+                    task.engineCategoryId = category.id;
                     task.engineId = '';
                 }
                 engineNode.empty();
-                showEngineForm(engineNode, newEngineCategoryId, task.engineId, function (newEngineId) {
-                    task.engineId = newEngineId;
+                showEngineForm(engineNode, task.engineCategoryId, task.engineId, function (engine) {
+                    task.engineId = engine.id;
+                    task.libraryRequired = engine.libraryRequired;
                 });
             });
             return taskNode;
         }
 
-        function isEngineRequireLibrary(engines, engineId) {
-            var requireLibrary = false;
-            var i, d;
-            for (i = 0; i < engines.length; i++) {
-                d = engines[i];
-                if (d.id === engineId && d.libraryRequired) {
-                    return true;
+        function getValidTasks(tasks) {
+            var res = [];
+            $.each(tasks, function (i, task) {
+                if (task && task.engineId) {
+                    res.push(task);
                 }
-            }
-            return false;
+            });
+            return res;
         }
 
         RED.nodes.registerType('engine-processing', {
@@ -160,13 +197,16 @@
                 return this.name || "engine-processing";
             },
             oneditprepare: function () {
-                var tasks = [].concat(this.tasks);
+                var tasks = [];
                 var taskListNode = $("#input-engine-tasks");
+                var addTaskButton = $("#btn-add-engine-task");
+                $.each(this.tasks || [], function (index, t) {
+                    tasks.push($.extend({}, t));
+                });
                 if (tasks.length === 0) {
                     tasks.push({});
                 }
                 taskListNode.data("tasks", tasks);
-                var addTaskButton = $("#btn-add-engine-task");
                 function setButtonVisibility() {
                     if (tasks.length < 5) {
                         addTaskButton.show();
@@ -200,8 +240,7 @@
                 var taskListNode = $("#input-engine-tasks");
                 var tasks = taskListNode.data("tasks");
                 if (tasks) {
-                    this.tasks = tasks;
-                    console.log(tasks);
+                    this.tasks = getValidTasks(tasks);
                 }
             }
         });
