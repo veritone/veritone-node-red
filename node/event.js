@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
   const bodyParser = require("body-parser");
 
   function rawBodyParser(req, res, next) {
@@ -31,12 +31,11 @@ module.exports = function(RED) {
     }
 
     getBody(
-      req,
-      {
+      req, {
         length: req.headers["content-length"],
         encoding: isText ? "utf8" : null
       },
-      function(err, buf) {
+      function (err, buf) {
         if (err) {
           return next(err);
         }
@@ -77,10 +76,12 @@ module.exports = function(RED) {
       "type",
       "vary"
     ];
-    toWrap.forEach(function(f) {
-      wrapper[f] = function() {
+    toWrap.forEach(function (f) {
+      wrapper[f] = function () {
         node.warn(
-          RED._("httpin.errors.deprecated-call", { method: "msg.res." + f })
+          RED._("httpin.errors.deprecated-call", {
+            method: "msg.res." + f
+          })
         );
         var result = res[f].apply(res, arguments);
         if (result === res) {
@@ -105,7 +106,7 @@ module.exports = function(RED) {
     this.veritoneUrl =
       "https://" + process.env.VERITONE_API_BASE_URL + "/v3/graphql";
     this.url = "/" + config.id.replace(".", "-");
-    this.nodeUrl =  "https://" + process.env.NODE_INSTANCE_URL + this.url;
+    this.nodeUrl = "https://" + process.env.NODE_INSTANCE_URL + this.url;
     if (process.env.AUTH_TOKEN) {
       this.nodeUrl = this.nodeUrl + "?authToken=" + process.env.AUTH_TOKEN;
     }
@@ -118,12 +119,12 @@ module.exports = function(RED) {
       this.token
     );
 
-    this.errorHandler = function(err, req, res, next) {
+    this.errorHandler = function (err, req, res, next) {
       node.warn(err);
       res.sendStatus(500);
     };
 
-    this.callback = function(req, res) {
+    this.callback = function (req, res) {
       var msgid = RED.util.generateId();
       res._msgid = msgid;
       node.send({
@@ -147,15 +148,25 @@ module.exports = function(RED) {
           this.callback,
           this.errorHandler
         );
-        this.status({ fill: "green", shape: "dot", text: "connected" });
+        this.status({
+          fill: "green",
+          shape: "dot",
+          text: "connected"
+        });
       })
       .catch(err => {
         this.error(err);
-        this.status({ fill: "red", shape: "ring", text: "disconnected" });
+        this.status({
+          fill: "red",
+          shape: "ring",
+          text: "disconnected"
+        });
       });
 
     var maxApiRequestSize = RED.settings.apiMaxLength || "5mb";
-    var jsonParser = bodyParser.json({ limit: maxApiRequestSize });
+    var jsonParser = bodyParser.json({
+      limit: maxApiRequestSize
+    });
     var urlencParser = bodyParser.urlencoded({
       limit: maxApiRequestSize,
       extended: true
@@ -170,10 +181,10 @@ module.exports = function(RED) {
       this.errorHandler
     );
 
-    this.on("close", function() {
+    this.on("close", function () {
       var node = this;
       apiUtil.unsubscribeEvents(this.subscriptionId);
-      RED.httpNode._router.stack.forEach(function(route, i, routes) {
+      RED.httpNode._router.stack.forEach(function (route, i, routes) {
         if (
           route.route &&
           route.route.path === node.url &&

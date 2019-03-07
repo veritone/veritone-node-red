@@ -1,25 +1,33 @@
 <script type="text/javascript">
-  RED.nodes.registerType('event in',{
+  RED.nodes.registerType('event in', {
     category: 'aiWARE',
-    color:"#b3e5fc",
+    color: "#b3e5fc",
     defaults: {
-      name: {value:""},
-      app: {value:"system"},
-      event_type: {value:""},
-      event_name: {value:""}
+      name: {
+        value: ""
+      },
+      app: {
+        value: "system"
+      },
+      event_type: {
+        value: ""
+      },
+      event_name: {
+        value: ""
+      }
     },
-    inputs:0,
-    outputs:1,
+    inputs: 0,
+    outputs: 1,
     icon: "veritone-logo-transparent.png",
     paletteLabel: "event",
-    label: function() {
+    label: function () {
       return this.name || "aiWARE event";
     }
   });
 </script>
 
 <script type="text/x-red" data-template-name="event in">
-    <div class="form-row">
+  <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
@@ -38,5 +46,5 @@
 </script>
 
 <script type="text/x-red" data-help-name="event in">
-    <p>Webhook endpoint for Veritone events</p>
+  <p>Webhook endpoint for Veritone events</p>
 </script>

@@ -1,5 +1,6 @@
 module.exports = function (RED) {
     "use strict";
+
     function v2fOut(n) {
         RED.nodes.createNode(this, n);
         var node = this;

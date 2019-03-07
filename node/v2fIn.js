@@ -150,47 +150,61 @@ module.exports = function (RED) {
     }
 
     function StartProcessing(config) {
-        RED.nodes.createNode(this,config);
+        RED.nodes.createNode(this, config);
         if (RED.settings.httpNodeRoot !== false) {
             this.url = '/process';
             this.method = 'post';
             this.upload = config.upload;
-            
+
             var node = this;
 
-            this.errorHandler = function(err,req,res,next) {
+            this.errorHandler = function (err, req, res, next) {
                 node.warn(err);
                 res.sendStatus(500);
             };
 
-            this.callback = function(req,res) {
+            this.callback = function (req, res) {
                 var msgid = RED.util.generateId();
                 res._msgid = msgid;
-                node.send({_msgid:msgid,req:req,res:createResponseWrapper(node,res),payload:req.body});
+                node.send({
+                    _msgid: msgid,
+                    req: req,
+                    res: createResponseWrapper(node, res),
+                    payload: req.body
+                });
             };
 
             var maxApiRequestSize = RED.settings.apiMaxLength || '5mb';
-            var jsonParser = bodyParser.json({limit:maxApiRequestSize});
-            var urlencParser = bodyParser.urlencoded({limit:maxApiRequestSize,extended:true});
+            var jsonParser = bodyParser.json({
+                limit: maxApiRequestSize
+            });
+            var urlencParser = bodyParser.urlencoded({
+                limit: maxApiRequestSize,
+                extended: true
+            });
 
-            var multipartParser = function(req,res,next) { next(); }
+            var multipartParser = function (req, res, next) {
+                next();
+            }
             if (this.upload) {
-                var mp = multer({ storage: multer.memoryStorage() }).any();
-                multipartParser = function(req,res,next) {
-                    mp(req,res,function(err) {
+                var mp = multer({
+                    storage: multer.memoryStorage()
+                }).any();
+                multipartParser = function (req, res, next) {
+                    mp(req, res, function (err) {
                         req._body = true;
                         next(err);
                     })
                 };
             }
 
-            RED.httpNode.post(this.url,jsonParser,urlencParser,multipartParser,rawBodyParser,this.callback,this.errorHandler);
+            RED.httpNode.post(this.url, jsonParser, urlencParser, multipartParser, rawBodyParser, this.callback, this.errorHandler);
 
-            this.on("close",function() {
+            this.on("close", function () {
                 var node = this;
-                RED.httpNode._router.stack.forEach(function(route,i,routes) {
+                RED.httpNode._router.stack.forEach(function (route, i, routes) {
                     if (route.route && route.route.path === node.url && route.route.methods[node.method]) {
-                        routes.splice(i,1);
+                        routes.splice(i, 1);
                     }
                 });
             });

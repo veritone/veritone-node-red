@@ -41,86 +41,98 @@
 </script>
 
 <script type="text/javascript">
- function oneditprepare() {
-  $("#node-input-collection").change(function () {
-   if($("#node-input-collection").val() === "") {
-	$("#node-warning").show();
-   } else {
-	$("#node-warning").hide();
-   }
-  });
- }
- RED.nodes.registerType('aiware', {
-  category: 'aiWARE',
-  color: '#b3e5fc',
-  defaults: {
-   name: {value: "", required: true },
-   format: {value:"handlebars", required: false },
-   syntax: {value:"mustache", required: false },
-   template: {value:"{ jobs(targetId: \{\{tdoId\}\}) { records {id status createdDateTime}}}", required: true }
-  },
-  inputs: 1,
-  outputs: 2,
-  outputLabels: ["result","error"],
-  icon: "veritone-logo-transparent.png",
-  paletteLabel: "api",
-  align: "right",
-  label: function() {
-   return this.name || "aiWARE api";
-  },
-  labelStyle: function() {
-   return this.name ? "node_label_italic" : "";
-  },
-  oneditprepare: function() {
-   var that = this;
-   if (!this.fieldType) {
-	this.fieldType = 'msg';
-   }
-   if (!this.syntax) {
-	this.syntax = 'mustache';
-	$("#node-input-syntax").val(this.syntax);
-   }
-   $("#node-input-field").typedInput({
-	default: 'msg',
-	types: ['msg','flow','global'],
-	typeField: $("#node-input-fieldType")
-   });
-   this.editor = RED.editor.createEditor({
-	id: 'node-input-template-editor',
-	mode: 'ace/mode/html',
-	value: $("#node-input-template").val()
-   });
-   RED.library.create({
-	url:"functions", // where to get the data from
-	type:"function", // the type of object the library is for
-	editor:that.editor, // the field name the main text body goes to
-	fields:['name','outputs']
-   });
-   this.editor.focus();
-   $("#node-input-format").change(function() {
-	var mod = "ace/mode/"+$("#node-input-format").val();
-	that.editor.getSession().setMode({
-	 path: mod,
-	 v: Date.now()
-	})
-   });
-  },
-  oneditsave: function() {
-   $("#node-input-template").val(this.editor.getValue())
-   delete this.editor;
-  },
-  oneditresize: function(size) {
-   var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-   var height = $("#dialog-form").height();
-   for (var i=0;i<rows.size();i++) {
-	height -= $(rows[i]).outerHeight(true);
-   }
-   var editorRow = $("#dialog-form>div.node-text-editor-row");
-   height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-   $(".node-text-editor").css("height",height+"px");
-   this.editor.resize();
-  }
- });
+    function oneditprepare() {
+        $("#node-input-collection").change(function () {
+            if ($("#node-input-collection").val() === "") {
+                $("#node-warning").show();
+            } else {
+                $("#node-warning").hide();
+            }
+        });
+    }
+    RED.nodes.registerType('aiware', {
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: {
+                value: "",
+                required: true
+            },
+            format: {
+                value: "handlebars",
+                required: false
+            },
+            syntax: {
+                value: "mustache",
+                required: false
+            },
+            template: {
+                value: "{ jobs(targetId: \{\{tdoId\}\}) { records {id status createdDateTime}}}",
+                required: true
+            }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "api",
+        align: "right",
+        label: function () {
+            return this.name || "aiWARE api";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function () {
+            var that = this;
+            if (!this.fieldType) {
+                this.fieldType = 'msg';
+            }
+            if (!this.syntax) {
+                this.syntax = 'mustache';
+                $("#node-input-syntax").val(this.syntax);
+            }
+            $("#node-input-field").typedInput({
+                default: 'msg',
+                types: ['msg', 'flow', 'global'],
+                typeField: $("#node-input-fieldType")
+            });
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-template-editor',
+                mode: 'ace/mode/html',
+                value: $("#node-input-template").val()
+            });
+            RED.library.create({
+                url: "functions", // where to get the data from
+                type: "function", // the type of object the library is for
+                editor: that.editor, // the field name the main text body goes to
+                fields: ['name', 'outputs']
+            });
+            this.editor.focus();
+            $("#node-input-format").change(function () {
+                var mod = "ace/mode/" + $("#node-input-format").val();
+                that.editor.getSession().setMode({
+                    path: mod,
+                    v: Date.now()
+                })
+            });
+        },
+        oneditsave: function () {
+            $("#node-input-template").val(this.editor.getValue())
+            delete this.editor;
+        },
+        oneditresize: function (size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i = 0; i < rows.size(); i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height", height + "px");
+            this.editor.resize();
+        }
+    });
 </script>
 
 <script type="text/x-red" data-help-name="aiware">
