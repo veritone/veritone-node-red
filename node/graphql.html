@@ -136,5 +136,53 @@
 </script>
 
 <script type="text/x-red" data-help-name="aiware">
-    <p>This node executes a aiWare API GraphQL Query or Mutation</p>
+    <p>Executes freeform graphql query and mutation statements with authentication already handled.</p>
+
+<h3>Inputs</h3>
+<p>Each api node has a createJob graphQL statement that is used for starting an Engine process using Veritone’s GraphQL API populated by default, but can be deleted and replaced with the GraphQL statement intended for execution in that node.</p>
+
+<p>Here is an example of mustache syntax in the api node:
+<code>{{payload.myVariable}}</code></p>
+
+<h3>Outputs</h3>
+     <ol class="node-ports">
+         <li>Standard output
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">json</span></dt>
+                 <dd>the standard output of the GraphQL call in JSON format.</dd>
+             </dl>
+         </li>
+         <li>Standard error
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">string</span></dt>
+                 <dd>This outputs any errors from the api node</dd>
+             </dl>
+         </li>
+     </ol>
+
+
+<h3>Details</h3>
+<p>If your GraphQL operation was correctly structured then the node will output data in Veritone’s GraphQL JSON format. Incorrect formatting or other errors will result in the node reporting a 400 Error.</p>
+
+<h3>References</h3>
+<p>You can also explore Veritone’s GraphQL API with the Veritone GraphiQL editor interface right in your browser with this <a href="https://api.veritone.com/v3/graphiql">link</a></p>
+
+<p>Start typing out the query and the GraphiQL interface will autotype the properties available for the chosen query.</p>
+
+<h4>GraphQL Sample</h4>
+<p>Here is a sample GraphQL query returning a list of your logged in Organization’s users:</p>
+<code>
+query{
+	users{
+		records{
+			id
+			name
+			firstName
+			lastName
+}
+}
+}
+</code>
+
+<p>This sample query will return the list of users in the Organization with the id, name, firstName, and lastName properties included for each user record. You can of course modify this query to remove any of these properties or add additional ones!</p>
 </script>
