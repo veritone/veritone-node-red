@@ -139,7 +139,7 @@
     <p>Executes freeform graphql query and mutation statements with authentication already handled.</p>
 
 <h3>Inputs</h3>
-<p>Each api node has a createJob graphQL statement that is used for starting an Engine process using Veritone’s GraphQL API populated by default, but can be deleted and replaced with the GraphQL statement intended for execution in that node.</p>
+<p>Each api node has a <code>createJob</code> graphQL statement that is populated in each node by default. This <code>createJob</code> mutation is used for starting an Engine process using Veritone’s GraphQL API populated by default, but can be deleted and replaced with the GraphQL statement intended for execution in that node.</p>
 
 <p>Here is an example of mustache syntax in the api node:
 <code>{{payload.myVariable}}</code></p>
@@ -172,15 +172,15 @@
 <h4>GraphQL Sample</h4>
 <p>Here is a sample GraphQL query returning a list of your logged in Organization’s users:</p>
 <code>
-query{
-	users{
-		records{
-			id
-			name
-			firstName
-			lastName
-}
-}
+query{ <br  />
+	users{ <br/>
+		records{ <br />
+			id <br />
+			name <br />
+			firstName <br />
+			lastName <br />
+} <br />
+} <br />
 }
 </code>
 
