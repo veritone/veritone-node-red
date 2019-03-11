@@ -1,4 +1,4 @@
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const mustache = require("mustache");
 
@@ -42,7 +42,7 @@ async function createJob(api, targetId, tasks) {
 }
 
 function CreateNode(RED, node, config) {
-    const api = NewVeritoneAPI(RED.log.debug);
+    const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config));
     const { targetId: targetIdTmpl, tasks: tasksConfig } = config;
     const tasks = tasksConfig.map(({ engineId }) => ({ engineId }));
     node.on("input", function (msg) {

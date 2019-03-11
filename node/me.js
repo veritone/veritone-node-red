@@ -1,9 +1,9 @@
 
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 
 function CreateNode(RED, node, config) {
-    const api = NewVeritoneAPI(RED.log.debug);
+    const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config));
     RED.log.debug("--- Veritone API init ---");
     node.on("input", function (msg) {
         RED.log.debug("--- on(input) ---");
