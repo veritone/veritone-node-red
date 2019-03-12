@@ -1,4 +1,4 @@
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { NewExpressOutput } = require('../lib/http');
 const mustache = require("mustache");
@@ -64,10 +64,11 @@ const actionWorkers = {
 };
 
 function CreateNode(RED, node, config) {
-    const api = NewVeritoneAPI(RED.log.debug);
+    
     const { action, actionData } = config;
     const { params, props } = actionData[action];
     node.on("input", function (msg) {
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
         const { onError, onSuccess } = NewOutput(node, msg);
         const worker = actionWorkers[action];
         if (!worker) {
