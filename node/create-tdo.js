@@ -1,4 +1,4 @@
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { get } = require('lodash');
 
@@ -10,7 +10,6 @@ async function createTDOWithAsset(api, input) {
 }
 
 function CreateNode(RED, node, config) {
-    const api = NewVeritoneAPI(RED.log.debug);
     const {
         uri, uriType, isPublic, tdoName: name,
         sourceId, contentType,
@@ -18,6 +17,7 @@ function CreateNode(RED, node, config) {
     } = config;
     const getUri = uriType === 'str' ? () => uri : (msg) => get(msg, uri);
     node.on("input", function (msg) {
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
         const uri = getUri(msg);
         const input = {
             uri, isPublic, name,

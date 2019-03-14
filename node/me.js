@@ -1,19 +1,18 @@
 
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 
-function CreateNode(RED, node, config) {
-    const api = NewVeritoneAPI(RED.log.debug);
-    RED.log.debug("--- Veritone API init ---");
-    node.on("input", function (msg) {
-        RED.log.debug("--- on(input) ---");
-        const query = `{ me {id name roles { name } } }`;
-        const { onError, onResponse } = NewOutput(node, msg);
-        api.Query(query).then(onResponse).catch(onError);
-    });
+async function me(api) {
+    const query = `{ me {id name roles { name } } }`;
+    const { me: res } = await api.Query(query);
+    return res;
+}
 
-    node.on("close", function () {
-        RED.log.debug("--- closing node VritoneAPI ---");
+function CreateNode(RED, node, config) {
+    node.on("input", function (msg) {
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const { onError, onSuccess } = NewOutput(node, msg);
+        me(api).then(onSuccess).catch(onError);
     });
 }
 
