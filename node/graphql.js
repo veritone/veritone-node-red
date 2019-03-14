@@ -9,7 +9,7 @@ function CreateNode(RED, node, config) {
         const syntax = msg.syntax || config.syntax;
         const query = (syntax === "mustache") ? mustache.render(template, msg) : template;
         const { onError, onSuccess } = NewOutput(node, msg);
-        api.Query(query).then(onSuccess).catch(onError);
+        api.Query(query, msg.variables).then(onSuccess).catch(onError);
     });
 }
 
