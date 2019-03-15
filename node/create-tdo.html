@@ -6,23 +6,28 @@
     </div>
     <div class="form-row">
         <label for="node-input-startDateTime"><i class="fa fa-calendar"></i> Start Time</label>
-        <input type="string" id="node-input-startDateTime">
+        <input type="string" id="node-input-startDateTime" style="width:70%">
+        <input type="hidden" id="node-input-startDateTimeType">
     </div>
     <div class="form-row">
         <label for="node-input-stopDateTime"><i class="fa fa-calendar"></i> Stop Time</label>
-        <input type="string" id="node-input-stopDateTime">
+        <input type="string" id="node-input-stopDateTime" style="width:70%">
+        <input type="hidden" id="node-input-stopDateTimeType">
     </div>
     <div class="form-row">
         <label for="node-input-tdoName"> TDO Name</label>
-        <input type="string" id="node-input-tdoName">
+        <input type="string" id="node-input-tdoName" style="width:70%">
+        <input type="hidden" id="node-input-tdoNameType">
     </div>
     <div class="form-row">
         <label for="node-input-sourceId"> Source ID</label>
-        <input type="string" id="node-input-sourceId">
+        <input type="string" id="node-input-sourceId" style="width:70%">
+        <input type="hidden" id="node-input-sourceIdType">
     </div>
     <div class="form-row">
         <label for="node-input-contentType"> Content Type</label>
-        <input type="string" id="node-input-contentType">
+        <input type="string" id="node-input-contentType" style="width:70%">
+        <input type="hidden" id="node-input-contentTypeType">
     </div>
     
     <div class="form-row">
@@ -51,13 +56,18 @@
         color: '#b3e5fc',
         defaults: {
             name: { value: "" },
-            tdoName: { value: "" },
-            sourceId: { value: "" },
-            contentType: { value: "" },
-            uri: { value: "", required: true },
+            tdoName: { value: "", validate: RED.validators.typedInput("tdoNameType") },
+            tdoNameType: { value: "str" },
+            sourceId: { value: "", required: true, validate: RED.validators.typedInput("sourceIdType") },
+            sourceIdType: { value: "str" },
+            contentType: { value: "", validate: RED.validators.typedInput("contentTypeType") },
+            contentTypeType: { value: "str" },
+            uri: { value: "", required: true, validate: RED.validators.typedInput("uriType") },
             uriType: { value: "str" },
-            startDateTime: { value: "" },
-            stopDateTime: { value: "" },
+            startDateTime: { value: "", validate: RED.validators.typedInput("startDateTimeType") },
+            startDateTimeType: { value: "str" },
+            stopDateTime: { value: "", validate: RED.validators.typedInput("stopDateTimeType") },
+            stopDateTimeType: { value: "str" },
             isPublic: { value: false },
             updateStopDateTimeFromAsset: { value: true }
         },
@@ -71,16 +81,22 @@
             return this.name || this.tdoName || "create-tdo";
         },
         oneditprepare: function () {
-            var $uriType = $("#node-input-uriType");
-            $("#node-input-uri").val(this.uri);
-            $("#node-input-uri").typedInput({
-                default: 'str',
-                typeField: $uriType,
-                types: ['str', 'msg']
+            var that = this;
+            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
+            $.each(fields, function (index, field) {
+                $("#node-input-" + field + "Type").val(that[field + "Type"]);
+                $("#node-input-" + field).typedInput({
+                    default: 'str',
+                    typeField: $("#node-input-" + field + "Type"),
+                    types: ['str', 'msg']
+                });
             });
         },
         oneditsave: function () {
-            $("#node-input-uri").val($("#node-input-uriType").typedInput('value'));
+            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
+            $.each(fields, function (index, field) {
+                that[field + "Type"] = $("#node-input-" + field + "Type").val();
+            });
         }
     });
 </script>
