@@ -9,22 +9,26 @@ async function createTDOWithAsset(api, input) {
     return res;
 }
 
+const fields = [
+    "tdoName", "sourceId", "contentType",
+    "uri", "startDateTime", "stopDateTime"
+];
+
+const fieldValue = (config, field, msg) => {
+    const value = config[field];
+    const isStr = config[`${field}Type`] === 'str';
+    return isStr ? value : get(msg, value);
+};
+
 function CreateNode(RED, node, config) {
-    const {
-        uri, uriType, isPublic, tdoName: name,
-        sourceId, contentType,
-        startDateTime, updateStopDateTimeFromAsset
-    } = config;
-    const getUri = uriType === 'str' ? () => uri : (msg) => get(msg, uri);
+    const { startDateTime, updateStopDateTimeFromAsset } = config;
     node.on("input", function (msg) {
         const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
-        const uri = getUri(msg);
-        const input = {
-            uri, isPublic, name,
-            sourceId, contentType,
-            startDateTime, updateStopDateTimeFromAsset
-        };
-
+        const alias = { tdoname: 'name' };
+        const input = { startDateTime, updateStopDateTimeFromAsset };
+        fields.forEach(field => {
+            input[alias[field] || field] = fieldValue(config, field, msg);
+        });
         const { onError, onSuccess } = NewOutput(node, msg);
         createTDOWithAsset(api, input).then(onSuccess).catch(onError);
     });
