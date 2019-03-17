@@ -1,11 +1,11 @@
 <script type="text/x-red" data-template-name="create-tdo">
     <div class="form-row">
-        <label for="node-input-uri"><i class="fa fa-link"></i> URI</label>
+        <label for="node-input-uri"><i class="fa fa-link"></i> URI </label>
         <input type="text" id="node-input-uri" style="width:70%">
         <input type="hidden" id="node-input-uriType">
     </div>
     <div class="form-row">
-        <label for="node-input-startDateTime"><i class="fa fa-calendar"></i> Start Time</label>
+        <label for="node-input-startDateTime"><i class="fa fa-calendar"></i> Start Time (*)</label>
         <input type="string" id="node-input-startDateTime" style="width:70%">
         <input type="hidden" id="node-input-startDateTimeType">
     </div>
@@ -20,7 +20,7 @@
         <input type="hidden" id="node-input-tdoNameType">
     </div>
     <div class="form-row">
-        <label for="node-input-sourceId"> Source ID</label>
+        <label for="node-input-sourceId"> Source ID </label>
         <input type="string" id="node-input-sourceId" style="width:70%">
         <input type="hidden" id="node-input-sourceIdType">
     </div>
@@ -58,11 +58,11 @@
             name: { value: "" },
             tdoName: { value: "", validate: RED.validators.typedInput("tdoNameType") },
             tdoNameType: { value: "str" },
-            sourceId: { value: "", required: true, validate: RED.validators.typedInput("sourceIdType") },
+            sourceId: { value: "", validate: RED.validators.typedInput("sourceIdType") },
             sourceIdType: { value: "str" },
             contentType: { value: "", validate: RED.validators.typedInput("contentTypeType") },
             contentTypeType: { value: "str" },
-            uri: { value: "", required: true, validate: RED.validators.typedInput("uriType") },
+            uri: { value: "", validate: RED.validators.typedInput("uriType") },
             uriType: { value: "str" },
             startDateTime: { value: "", validate: RED.validators.typedInput("startDateTimeType") },
             startDateTimeType: { value: "str" },
