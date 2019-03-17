@@ -10,7 +10,7 @@ async function me(api) {
 
 function CreateNode(RED, node, config) {
     node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
         me(api).then(onSuccess).catch(onError);
     });

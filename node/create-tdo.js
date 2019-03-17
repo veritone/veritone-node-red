@@ -23,7 +23,7 @@ const fieldValue = (config, field, msg) => {
 function CreateNode(RED, node, config) {
     const { startDateTime, updateStopDateTimeFromAsset } = config;
     node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const alias = { tdoname: 'name' };
         const input = { startDateTime, updateStopDateTimeFromAsset };
         fields.forEach(field => {
