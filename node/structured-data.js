@@ -68,7 +68,7 @@ function CreateNode(RED, node, config) {
     const { action, actionData } = config;
     const { params, props } = actionData[action];
     node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
         const worker = actionWorkers[action];
         if (!worker) {

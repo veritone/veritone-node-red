@@ -45,7 +45,7 @@ function CreateNode(RED, node, config) {
     const { targetId: targetIdTmpl, tasks: tasksConfig } = config;
     const tasks = tasksConfig.map(({ engineId }) => ({ engineId }));
     node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
         const targetId = render(targetIdTmpl, msg);
         createJob(api, targetId, tasks).then(onSuccess).catch(onError);
@@ -67,7 +67,9 @@ function registerHttpEndpoints(RED) {
 }
 
 module.exports = function (RED) {
-    registerHttpEndpoints(RED);
+    if (RED.settings.httpNodeRoot !== false) {
+        registerHttpEndpoints(RED);
+    }
     const NodeName = 'engine-processing';
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);

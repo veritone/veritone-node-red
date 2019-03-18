@@ -4,7 +4,7 @@ const { NewOutput } = require('../lib/output');
 
 function CreateNode(RED, node, config) {
     node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg.orgToken);
+        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const template = msg.template || config.template;
         const syntax = msg.syntax || config.syntax;
         const query = (syntax === "mustache") ? mustache.render(template, msg) : template;
