@@ -101,16 +101,46 @@
     });
 </script>
 
-<script type="text/x-red" data-help-name="create-tdo">
-    <p>
-        The create-tdo node creates a TemporalDataObject container object 
-        in aiWARE and a child Asset records that stores the original media file.
-        <br>
-        The node is usually used with the processing node for first 
-        creating Files in aiWARE's data model, and then running cognitive on those Files.
-        <br>
-        <br>
-        Each TemporalDataObject expects a start time. If left blank, the Start Time will be populated 
-        with the dateTime value the TDO was created in aiWARE.
-    </p>
+<script type="text/x-red" data-help-name="create file">
+    <p>Creates a media file that in aiWARE is stored as a <code>TemporalDataObject</code> (also known as TDO) along with a child <code>asset</code> that is a link to the specific media file path. </p>
+
+<h3>Inputs</h3>
+<dl class="message-properties">
+    
+    <dt>URI <span class="property-type">string</span></dt>
+    <dd>
+        The URI expects a cloud-hosted file path for downloading the file and ingesting the file into aiWARE.
+    </dd>
+    <dt>Start Time <span class="property-type">timestamp</span></dt>
+        <dd>Each <code>TemporalDataObject</code> expects a Start Time. If left blank, the Start Time will be populated with the DateTime value the TDO was created in aiWARE.
+        </dd>
+    <dt>Stop Time <span class="property-type">timestamp</span></dt>
+    <dd>
+        Similar to Start Time, Stop Time expects the actual end of the media file and is used to calculate the total file duration.
+    </dd>
+    <dt>Content Type <span class="property-type">string</span></dt>
+    <dd>
+        Content Type is optional and is used for associating a pre-defined custom schema to the media file upon creation in aiWARE. This is useful for correlating aiWARE Structured Data with Media Files.
+    </dd>
+</dl>
+
+<h3>Outputs</h3>
+<dl class="message properties">
+    <dt>payload <span class="property-type">json</span></dt>
+    <dd>
+        The <code>msg.payload</code> will contain the TDO <code>id</code> and <code>name</code> properties along with the newly created <code>asset</code> properties of <code>id</code>, <code>assetType</code>, and the <code>signedUri</code> which is the file path that is signed for external clients to access the media file.
+    </dd>
+</dl>
+
+<h3>Details</h3>
+<p>
+    The TDO serves as the “Container” of a media file and any associated important information, including templated data and various permutations of the media file.
+</p>
+
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/apis/data-model">Click here</a> to read more about the Veritone aiWARE Data Model
+   </li>
+</ul>
 </script>
