@@ -27,8 +27,41 @@
     }
 </style>
 
-<script type="text/x-red" data-help-name="structured-data">
-    <p>Structured data</p>
+<script type="text/x-red" data-help-name="structured data">
+    <p>This node can perform <code>Create</code>, <code>Read</code>, <code>Update</code>, and <code>Delete</code> operations on structured data records in aiWARE.</p>
+
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>Record ID <span class="property-type">string</span></dt>
+    <dd>
+        The <code>Record ID</code> field expects the id of the Structured Data Objects (SDO records in a selected Schema) and is optional for the <code>Query</code> operation but required for the Update and Delete operations.
+        <br/>
+        <br/>
+        If <code>Record ID</code> is left blank for the Query operation then the node returns a list of Structured Data Object records in the selected schema.
+    </dd>
+</dl>
+
+<h3>Outputs</h3>
+<dl class="message-properties">
+    <dt> payload <span class="property-type">json</span></dt>
+    <dd>
+        The <code>msg.payload</code> will vary depending on the operation selected by the user. If the Delete option is selected, then the Id of the SDO deleted will be returned in the payload. If an SDO was created or updated, then the Id will be returned in the payload.
+         <br/>
+        Choosing the Query option will have the most impact on the payload structured. Selecting the Query option will enable a user to select not only the SDO Id, but any fields defined in that SDO's schema as well. The selected fields will be returned as the data type they were defined in the schema.
+    </dd>
+</dl>
+
+
+<h3>Details</h3>
+<p>Both the Operation and the Schema need to be selected to perform a valid operation in this node. The Schema dropdown will list all of the Schemas available to the active user in the organization that they are logged into.</p>
+
+<p>When a Schema is selected, the fields defined in that Schema will display with input fields for users to type in either a string value or a mustache syntax variable.</p>
+
+<h3>References</h3>
+<ul>
+    <li><a href="https://docs.veritone.com/#/data/">Structured Data Overview docs</a></li>
+    <li><a href="https://docs.veritone.com/#/data/quick-start/">Structured Data Quickstart docs<a></li>
+</ul>
 </script>
 
 <script type="text/javascript">
