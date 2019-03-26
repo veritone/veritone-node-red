@@ -67,7 +67,7 @@
                 required: false
             },
             template: {
-                value: "{ jobs(targetId: \{\{tdoId\}\}) { records {id status createdDateTime}}}",
+                value: "{\n  jobs(targetId: \{\{tdoId\}\}) {\n    records {\n      id status createdDateTime\n    }\n  }\n}",
                 required: true
             }
         },
