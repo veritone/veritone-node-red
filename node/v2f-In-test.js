@@ -42,8 +42,26 @@ function CreateNode(RED, node, config) {
     });
 }
 
+function registerHttpEndpoints(RED) {
+    RED.httpAdmin.post("/veritone/v2f-in-test/:id", RED.auth.needsPermission("inject.write"), function(req,res) {
+        var node = RED.nodes.getNode(req.params.id);
+        if (node != null) {
+            try {
+                node.receive();
+                res.sendStatus(200);
+            } catch(err) {
+                res.sendStatus(500);
+                node.error(RED._("inject.failed",{error:err.toString()}));
+            }
+        } else {
+            res.sendStatus(404);
+        }
+    });
+}
+
 module.exports = function (RED) {
     const NodeName = 'v2f-in-test';
+    registerHttpEndpoints(RED);
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
         CreateNode(RED, this, config);
