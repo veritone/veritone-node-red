@@ -8,7 +8,7 @@
             mimeType: { value: "" },
             testPayload: { value: {} }
         },
-        inputs: 1,
+        inputs: 0,
         outputs: 2,
         icon: "veritone-logo-transparent.png",
         paletteLabel: "V2F In Test",
@@ -53,7 +53,7 @@
                     url: "veritone/v2f-in-test/"+this.id,
                     type:"POST",
                     success: function(resp) {
-                        RED.notify(node._("inject.success",{label:label}),"success");
+                        RED.notify(node._("inject.v2f-in.success",{label:label}),"success");
                     },
                     error: function(jqXHR,textStatus,errorThrown) {
                         if (jqXHR.status == 404) {
