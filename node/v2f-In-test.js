@@ -1,28 +1,5 @@
 const bodyParser = require("body-parser");
-
-function createResponseWrapper(node, res) {
-    const wrapper = { _res: res };
-    const toWrap = [
-        "append", "attachment", "cookie", "clearCookie", "download", "end",
-        "format", "get", "json", "jsonp", "links", "location",
-        "redirect", "render", "send", "sendfile", "sendFile", "sendStatus",
-        "set", "status", "type", "consty"
-    ];
-    toWrap.forEach(function (f) {
-        wrapper[f] = function () {
-            node.warn(RED._("httpin.errors.deprecated-call", {
-                method: "msg.res." + f
-            }));
-            const result = res[f].apply(res, arguments);
-            if (result === res) {
-                return wrapper;
-            } else {
-                return result;
-            }
-        }
-    });
-    return wrapper;
-}
+const { CreateResponseWrapper } = require('../lib/http');
 
 function CreateNode(RED, node, config) {
     const { engineMode, mimeType, testPayload } = config;
@@ -63,7 +40,7 @@ function registerHttpEndpoints(RED) {
                 res._msgid = msgid;
                 const msg = {
                     _msgid: msgid, req: req,
-                    res: createResponseWrapper(node, res),
+                    res: CreateResponseWrapper(node, res),
                     payload: req.body
                 };
                 node.receive(msg);
@@ -85,7 +62,7 @@ module.exports = function (RED) {
         try {
             registerHttpEndpoints(RED);
         } catch (e) {
-            console.log(e);
+            RED.log.debug(e.stack || e);
         }
     }
     RED.nodes.registerType(NodeName, function (config) {
