@@ -111,10 +111,19 @@
             parent.append(loading);
             getEngines(engineCategoryId, function (data) {
                 var engineInput = newSelectNode(data, "Select engine");
+                var engineLink = $('<a style="cursor:pointer">Check out the Engine Build here<a>');
                 var engineForm = $(`<div class="form-row" id="input-engineId"></div>`).append(
                     `<label for="node-input-engineId"><i class="fa fa-cog"></i> Engine</label>`,
-                    engineInput
+                    engineInput,`<br>`, engineLink
                 );
+                engineLink.on("click", function () {
+                    var engineID = engineInput.val();
+                    if (engineID) {
+                        var link = `https://developer.aws-dev.veritone.com/engines/${engineID}/builds`;
+                        var win = window.open(link, "_blank");
+                        win.focus();
+                    }
+                });
                 engineInput.on("change", function () {
                     var engine = findById(data, engineInput.val());
                     if (engine) {
