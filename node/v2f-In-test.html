@@ -1,0 +1,105 @@
+<script type="text/javascript">
+    RED.nodes.registerType('v2f-in-test', {
+        category: 'aiWARE',
+        color: "#b3e5fc",
+        defaults: {
+            name: { value: "" },
+            engineMode: { value: "" },
+            mimeType: { value: "" },
+            testPayload: { value: {} }
+        },
+        inputs: 0,
+        outputs: 2,
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "V2F In Test",
+        label: function () {
+            return this.name || "V2F In Test";
+        },
+        oneditprepare: function () {
+            $("#node-input-mimeType").typeahead({
+                source: [
+                    "application/octet-stream", "application/pdf",
+                    "application/pkcs12", "application/vnd.mspowerpoint",
+                    "application/xhtml+xml", "application/xml",
+                    "image/bmp", "image/gif", "image/jpeg", "image/png",
+                    "image/webp",
+                    "video/mp4", "video/ogg", "video/webm",
+                    "audio/midi", "audio/mpeg", "audio/ogg", "audio/wav",
+                    "audio/webm",
+                    "text/css", "text/html", "text/javascript", "text/plain"
+                ],
+                minLength: 0
+            });
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-testPayload-editor',
+                mode: 'ace/mode/json',
+                value: $("#node-input-testPayload").val()
+            });
+        },
+        oneditsave: function () {
+            $("#node-input-testPayload").val(this.editor.getValue())
+            delete this.editor;
+        },
+        button: {
+            enabled: function() {
+                return !this.changed
+            },
+            onclick: function() {
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                }
+                var node = this;
+                $.ajax({
+                    url: "veritone/v2f-in-test/"+this.id,
+                    type:"POST",
+                    success: function(resp) {
+                        RED.notify(node._("inject.v2f-in.success",{label:label}),"success");
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="v2f-in-test">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-engineMode"><i class="fa fa-cog"></i> Engine Mode</label>
+        <select id="node-input-engineMode" style="width:66%">
+            <option value="segment">Segment</option>
+            <option value="batch">Batch</option>
+            <option value="stream">Stream</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-mimeType"><i class="fa fa-file"></i> File Type</label>
+        <input type="text" id="node-input-mimeType" placeholder="video/mp4">
+    </div>
+    <div class="form-row">
+        <label for="node-input-testPayload"><i class="fa fa-file-word"></i> Test Payload</label>
+        <input type="hidden" id="node-input-testPayload" autofocus="focus">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-testPayload-editor" ></div>
+    </div>
+    
+        
+</script>
+
+<script type="text/x-red" data-help-name="v2f-in-test">
+    <p>V2F In Test </p>
+</script>
