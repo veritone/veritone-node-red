@@ -41,6 +41,7 @@
         var engineCaches = {};
         var getEngineCategories = getAndCache("/veritone/engineCategories");
         var getLibraries = getAndCache("/veritone/libraries");
+        var getEnv = getAndCache("/veritone/env");
         function getEngines(engineCategoryId, done) {
             if (engineCaches[engineCategoryId]) {
                 done(engineCaches[engineCategoryId]);
@@ -111,23 +112,22 @@
             parent.append(loading);
             getEngines(engineCategoryId, function (data) {
                 var engineInput = newSelectNode(data, "Select engine");
-                var engineLink = $('<a style="cursor:pointer">Check out the Engine Build here<a>');
+                var engineLink = $('<a target="_blank">Check out the Engine Build here<a>');
                 var engineForm = $(`<div class="form-row" id="input-engineId"></div>`).append(
                     `<label for="node-input-engineId"><i class="fa fa-cog"></i> Engine</label>`,
-                    engineInput,`<br>`, engineLink
+                    engineInput, `<br>`, engineLink
                 );
-                engineLink.on("click", function () {
-                    var engineID = engineInput.val();
-                    if (engineID) {
-                        var link = `https://developer.aws-dev.veritone.com/engines/${engineID}/builds`;
-                        var win = window.open(link, "_blank");
-                        win.focus();
-                    }
-                });
                 engineInput.on("change", function () {
                     var engine = findById(data, engineInput.val());
                     if (engine) {
+                        getEnv(function (env) {
+                            var link = `${env.VERITONE_DEVELOPER_APP_URL}/engines/${engine.id}/builds`;
+                            engineLink.show();
+                            engineLink.attr('href', link);
+                        });
                         onChange(engine);
+                    } else {
+                        engineLink.hide();
                     }
                 });
                 loading.remove();
