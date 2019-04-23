@@ -2,18 +2,21 @@
 const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 
-async function me(api) {
-    const query = `{ me {id name roles { name } } }`;
-    const { me: res } = await api.Query(query);
-    return res;
+async function userLogin(api, input) {
+	const command = 'userLogin';
+	const fields = `token apiToken`;
+	const { userLogin: res } = await api.Mutate(command, input, fields);
+	return res;
 }
 
 function CreateNode(RED, node, config) {
-    node.on("input", function (msg) {
-        const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
-        const { onError, onSuccess } = NewOutput(node, msg);
-        me(api).then(onSuccess).catch(onError);
-    });
+	const { userName, password } = config;
+	node.on("input", function (msg) {
+		const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
+		const { onError, onSuccess } = NewOutput(node, msg);
+		const input = { userName, password };
+		userLogin(api, input).then(onSuccess).catch(onError);
+	});
 }
 
 function registerHttpEndpoints(RED) {
