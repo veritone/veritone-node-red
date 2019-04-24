@@ -35,5 +35,46 @@
 </script>
 
 <script type="text/x-red" data-help-name="me">
-    <p>Get me</p>
+    <p> 
+    The Me node shares general information about the logged-in user account using the Flow Designer and can also be used to generate a new user session token when any aiWARE user's credentials are provided.
+    <br />
+    <br />
+    Note: The <code>username</code> and <code>password</code> variables can only be inputted through the node form UI.
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        userName <span class="property-type">string</span>
+    </dt>
+    <dd>
+        the userName of the aiWARE user seat intended to login into
+    </dd>
+     <dt>
+        password <span class="property-type">string</span>
+    </dt>
+    <dd>
+        This is the password for the aiWARE username intended to login into
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+         <li>
+            <dl class="message-properties">
+                <dt>Me payload <span class="property-type">json</span></dt>
+                 <dd>Output JSON containing the information of the logged in user including user <code>id</code> and <code>name</code> </dd>
+             </dl>
+         </li>
+         <li>Session payload
+             <dl class="message-properties">
+                 <dt>payload <span class="property-type">json</span></dt>
+                 <dd>The session token generated upon successfully executing a <code>userLogin</code> GraphQL mutation.</dd>
+             </dl>
+         </li>
+     </ol>
+<h3>Details</h3>
+<p>The Me node enables users to provide their own credentials to any aiWARE org and generate a user session token for accesing objects that the user logging in may have access to. When no user credentials are provided, the node executes a <code>query{ me { name } }</code> GraphQL query that returns the name of the user using the flow when logged in.
+<h3>References</h3>
+<ul>
+    <li><a href="https://docs.veritone.com/#/apis/examples?id=authentication">Veritone API Docs</a> - Further reading on user authentication and API tokens
+</ul>
 </script>
