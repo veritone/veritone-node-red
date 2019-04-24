@@ -152,6 +152,12 @@
     <dd>
         assign this variable to the organization API token performing an authorized API request on that organization (optional)
     </dd>
+    <dt>
+        variables <span class="property-type">JSON</span>
+    </dt>
+    <dd>
+        assign this variable as a JSON object that contains the properties that map to the <code>$data</code> flags within the GraphQL statement. See <span style="font-style:500">Query Variables</span> section for more info.
+    </dd>
 </dl>
 
 <h3>Outputs</h3>
@@ -201,4 +207,23 @@ query{
 </code>
 
 <p>This sample query will return the list of users in the Organization with the id, name, firstName, and lastName properties included for each user record. You can of course modify this query to remove any of these properties or add additional ones!</p>
+<h4>Query Variables</h4>
+<p>
+    Users can create a <code>msg.variables</code> JSON variable in a previous node (eg a <span style="font-style:italic">change</span> or <span style="font-style:italic">function</span> node) that maps the contained key-value pair to the <code>$data</code> flags within the GraphQL statement.
+    <br />
+    <br />
+    Here is an example:
+</p>
+<code>
+    mutation updateWatchlist ($id: ID!, $details: JSONData!){
+    updateWatchlist(input:{
+    id: $id
+    details: $details
+    }){
+    id
+    details
+    }
+}
+</code>
+
 </script>
