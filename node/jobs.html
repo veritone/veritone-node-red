@@ -1,0 +1,95 @@
+<script type="text/x-red" data-template-name="aiware-jobs">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-limit"><i class="icon-limit"></i> Limit</label>
+        <input type="number" id="node-input-limit" placeholder="20">
+    </div>
+    <div class="form-row" id="node-input-job-selected-fields">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('aiware-jobs', {
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: { value: "" },
+            limit: { value: 10 },
+            fields: { value: ["id", "name", "status", "createdDateTime"] },
+            taskFields: { value: [] }
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "my jobs",
+        align: "right",
+        label: function () {
+            return this.name || "my jobs";
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function () {
+            var availableFields = [
+                'id', 'name', 'createdDateTime', 'status',
+                'targetId', 'jobConfig',
+                'description', 'modifiedDateTime'
+            ];
+            var availableTaskFields = [
+                'id', 'status', 'payload', 'output',
+                'queuedDateTime', 'startedDateTime', 'completedDateTime',
+                'order', 'engineId', 'buildId', 'sourceAssetId'
+            ];
+            var mapFields = {};
+            var mapTaskFields = {};
+            (this.fields || []).forEach(function (field) {
+                mapFields[field] = true;
+            });
+            (this.taskFields || []).forEach(function (field) {
+                mapTaskFields[field] = true;
+            })
+            this.mapFields = mapFields;
+            this.mapTaskFields = mapTaskFields;
+            $("#node-input-job-selected-fields").append(
+                "<h5> Select Jobs Fields </h5>",
+                availableFields.map(function (field) {
+                    var fieldNode = $(`<span> ${field}</span>`);
+                    var checkbox = $(`<input type="checkbox" style="vertical-align: baseline; width: 30px">`);
+                    checkbox.prop("checked", mapFields[field]);
+                    checkbox.on("change", function () {
+                        mapFields[field] = checkbox.prop("checked");
+                    });
+                    return $("<div></div>").append(checkbox, fieldNode);
+                }),
+                "<h5> Select Tasks Fields </h5>",
+                availableTaskFields.map(function (field) {
+                    var fieldNode = $(`<span> ${field}</span>`);
+                    var checkbox = $(`<input type="checkbox" style="vertical-align: baseline; width: 30px">`);
+                    checkbox.prop("checked", mapTaskFields[field]);
+                    checkbox.on("change", function () {
+                        mapTaskFields[field] = checkbox.prop("checked");
+                    });
+                    return $("<div></div>").append(checkbox, fieldNode);
+                }),
+            );
+        },
+        oneditsave: function () {
+            var fields = this.mapFields;
+            this.fields = Object.keys(fields).filter(function (k) {
+                return fields[k];
+            });
+            var mapTaskFields = this.mapTaskFields;
+            this.taskFields = Object.keys(mapTaskFields).filter(function (k) {
+                return mapTaskFields[k];
+            });
+        }
+    });
+</script>
+
+<script type="text/x-red" data-help-name="aiware-jobs">
+    Query jobs
+</script>

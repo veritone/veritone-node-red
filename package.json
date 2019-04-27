@@ -21,6 +21,7 @@
     "nodes": {
       "event": "node/event.js",
       "graphql": "node/graphql.js",
+      "jobs": "node/jobs.js",
       "me": "node/me.js",
       "create-tdo": "node/create-tdo.js",
       "structured-data": "node/structured-data.js",
