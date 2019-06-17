@@ -1,3 +1,51 @@
+<script type="text/x-red" data-template-name="v2f-in-test">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-engineMode"><i class="fa fa-cog"></i> Engine Mode</label>
+        <select id="node-input-engineMode" style="width:66%">
+            <option value="segment">Segment</option>
+            <option value="batch">Batch</option>
+            <option value="stream">Stream</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-mimeType"><i class="fa fa-file"></i> File Type</label>
+        <input type="text" id="node-input-mimeType" placeholder="video/mp4">
+    </div>
+    <div class="form-row">
+        <div for="node-input-customFields"><i class="fa fa-list"></i> Custom Fields</div>
+        <table class="table table-dense" style="width:100%; margin-bottom:6px">
+            <thead>
+                <th>Key</th>
+                <th>Value</th>
+            </thead>
+            <tbody id="input-for-customFields"></tbody>
+        </table>
+        <button id="btn-add-customField" class="btn pull-right">Add field</button>
+    </div>
+    <div class="form-row">
+        <label style="width:50%" for="node-input-testPayload"><i class="fa fa-object-group"></i> Test Payload</label>
+        <input type="hidden" id="node-input-testPayload" autofocus="focus">
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-testPayload-editor" ></div>
+    </div>
+</script>
+<style>
+    .input-custom-field-form {
+        border: 1px solid #aaa;
+        padding: 0 6px;
+        margin: 6px 0;
+    }
+</style>
+
+<script type="text/x-red" data-help-name="v2f-in-test">
+    <p>V2F In Test </p>
+</script>
+
 <script type="text/javascript">
     RED.nodes.registerType('v2f-in-test', {
         category: 'aiWARE',
@@ -6,7 +54,8 @@
             name: { value: "" },
             engineMode: { value: "" },
             mimeType: { value: "" },
-            testPayload: { value: {} }
+            testPayload: { value: "{}" },
+            customFields: { value: [] }
         },
         inputs: 0,
         outputs: 2,
@@ -35,71 +84,91 @@
                 mode: 'ace/mode/json',
                 value: $("#node-input-testPayload").val()
             });
+            // Custom Fields
+            var customFields = this.customFields || [];
+            var customFieldsNode = $("#input-for-customFields");
+            customFieldsNode.data("customFields", customFields);
+            function showField(index, field) {
+                var fieldKeyNode = $("<input type='text' style='width:100%'>").val(field.key);
+                var fieldValueNode = $("<input type='text' style='width:100%'>").val(field.value);
+                var removeButton = $(`<i class="fa fa-trash"></i>`);
+                var fieldNode = $(`<tr></tr>`).append(
+                    $('<td></td>').append(fieldKeyNode),
+                    $('<td></td>').append(fieldValueNode),
+                    $('<td></td>').append(removeButton)
+                );
+                removeButton.on("click", function () {
+                    var message = `Do you want to delete field ${field.key}?`;
+                    if (confirm(message)) {
+                        fieldNode.empty();
+                        customFields.splice(index, 1);
+                    }
+                });
+                fieldKeyNode.on("change", function () {
+                    field.key = fieldKeyNode.val();
+                });
+                fieldValueNode.on("change", function () {
+                    field.value = fieldValueNode.val();
+                });
+                customFieldsNode.append(fieldNode);
+            }
+            $.each(customFields, showField);
+            $("#btn-add-customField").on("click", function () {
+                var field = {};
+                customFields.push(field);
+                showField(customFields.length - 1, field);
+            });
         },
         oneditsave: function () {
             $("#node-input-testPayload").val(this.editor.getValue())
             delete this.editor;
+            var customFieldsNode = $("#input-for-customFields");
+            var customFields = customFieldsNode.data("customFields");
+            function getValidFields(fields) {
+                var res = [];
+                $.each(fields, function (i, field) {
+                    if (field && field.key) {
+                        res.push(field);
+                    }
+                });
+                return res;
+            }
+            console.log(customFields);
+            if (customFields) {
+                this.customFields = getValidFields(customFields);
+            }
         },
         button: {
-            enabled: function() {
+            enabled: function () {
                 return !this.changed
             },
-            onclick: function() {
+            onclick: function () {
                 if (this.changed) {
-                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                    return RED.notify(RED._("notification.warning", { message: RED._("notification.warnings.undeployedChanges") }), "warning");
                 }
                 var node = this;
                 $.ajax({
-                    url: "veritone/v2f-in-test/"+this.id,
-                    type:"POST",
-                    success: function(resp) {
-                        RED.notify(node._("inject.v2f-in.success",{label:label}),"success");
+                    url: "veritone/v2f-in-test/" + this.id,
+                    type: "POST",
+                    contentType: 'application/json',
+                    data: node.testPayload,
+                    success: function (resp) {
+                        var label = node.name;
+                        RED.notify(node._("inject.v2f-in.success", { label: label }), "success");
                     },
-                    error: function(jqXHR,textStatus,errorThrown) {
+                    error: function (jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {
-                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                            RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.not-deployed") }), "error");
                         } else if (jqXHR.status == 500) {
-                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                            RED.notify(node._("common.notification.error", { message: node._("inject.errors.failed") }), "error");
                         } else if (jqXHR.status == 0) {
-                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                            RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.no-response") }), "error");
                         } else {
-                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                            RED.notify(node._("common.notification.error", { message: node._("common.notification.errors.unexpected", { status: jqXHR.status, message: textStatus }) }), "error");
                         }
                     }
                 });
             }
         }
     });
-</script>
-
-<script type="text/x-red" data-template-name="v2f-in-test">
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-engineMode"><i class="fa fa-cog"></i> Engine Mode</label>
-        <select id="node-input-engineMode" style="width:66%">
-            <option value="segment">Segment</option>
-            <option value="batch">Batch</option>
-            <option value="stream">Stream</option>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="node-input-mimeType"><i class="fa fa-file"></i> File Type</label>
-        <input type="text" id="node-input-mimeType" placeholder="video/mp4">
-    </div>
-    <div class="form-row">
-        <label for="node-input-testPayload"><i class="fa fa-file-word"></i> Test Payload</label>
-        <input type="hidden" id="node-input-testPayload" autofocus="focus">
-    </div>
-    <div class="form-row node-text-editor-row">
-        <div style="height: 250px;" class="node-text-editor" id="node-input-testPayload-editor" ></div>
-    </div>
-    
-        
-</script>
-
-<script type="text/x-red" data-help-name="v2f-in-test">
-    <p>V2F In Test </p>
 </script>
