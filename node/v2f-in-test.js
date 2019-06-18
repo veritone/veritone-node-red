@@ -2,7 +2,8 @@ const bodyParser = require("body-parser");
 const { CreateResponseWrapper } = require('../lib/http');
 
 function CreateNode(RED, node, config) {
-    const { engineMode, mimeType, testPayload } = config;
+    const { customFields, mimeType, testPayload } = config;
+    node.config = { customFields };
     node.on("input", function (msg) {
         // overwrite payload
         const event = JSON.parse(testPayload);
@@ -38,12 +39,17 @@ function registerHttpEndpoints(RED) {
             try {
                 const msgid = RED.util.generateId();
                 res._msgid = msgid;
+                const payload = { ...req.body };
+                const { customFields = [] } = node.config || {};
+                customFields.forEach(field => {
+                    payload[field.key] = field.value;
+                });
                 const msg = {
                     _msgid: msgid, req: req,
                     res: CreateResponseWrapper(node, res),
-                    payload: req.body
+                    payload
                 };
-                node.receive(msg);
+                node.send(msg);
                 res.sendStatus(200);
             } catch (err) {
                 res.sendStatus(500);
