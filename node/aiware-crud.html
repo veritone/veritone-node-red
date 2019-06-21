@@ -4,47 +4,145 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row">
+        <label for="node-input-object"><i class="icon-tag"></i> Object</label>
         <select id="node-input-object" style="width:66%">
             <option value="watchlist">Watchlist</option>
             <option value="collection">Collection</option>
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-action"><i class="icon-tag"></i> Action</label>
         <select id="node-input-action" style="width:66%">
             <option value="create">Create</option>
-            <option value="query">Query</option>
+            <option value="read">Read</option>
             <option value="update">Update</option>
             <option value="delete">Delete</option>
         </select>
     </div>
+    <div class="form-row">
+        <label><i class="icon-tag"></i> Parameters</label>
+    </di>
     <div id="input-for-crud-data"></div>
-  </script>
+</script>
 
 <script type="text/x-red" data-help-name="aiware-crud">
     <p>Webhook endpoint for Veritone events</p>
-  </script>
+</script>
 
 <script type="text/javascript">
     (function () {
+        const inputTypes = {
+            "string": "text",
+            "number": "number",
+            "boolean": "checkbox",
+            "dateTime": "datetime"
+        };
         const crudKey = (object, action) => `${object}.${action}`;
         const crudDataNode = () => $("#input-for-crud-data");
-        const crudData = (key, data) => crudDataNode().val(key, data);
-        const createWatchlist = {
-            type: 'object',
-            title: 'Create Watchlist',
-            required: ['stopDateTime', 'name'],
-            properties: [
-                { startDateTime: { type: 'string' } },
-                { stopDateTime: { type: 'string' } },
-                { sourceTypeIds: { type: 'array', items: { type: 'string' } } },
-                { sourceId: { type: 'array', items: { type: 'string' } } },
-                { details: { type: 'object' } }
-            ]
-        }
-        const params = {
+        const getCrudData = (key) => crudDataNode().data(key);
+        const setCrudData = (key, data) => crudDataNode().data(key, data);
+        const Schemas = {
             'watchlist.create': {
-                startDateTime: { type: 'str' }
+                title: 'Create Watchlist',
+                params: [
+                    { field: 'startDateTime', type: 'string' },
+                    { field: 'stopDateTime', required: true, type: 'string' },
+                    { field: 'name', required: true },
+                    { field: 'sourceTypeIds', type: 'array', items: { type: 'string' } },
+                    { field: 'sourceId', type: 'array', items: { type: 'string' } },
+                    { field: 'details', type: 'object' }
+                ]
+            },
+            'watchlist.update': {
+                title: 'Update Watchlist',
+                params: [
+                    { field: 'id', required: true },
+                    { field: 'startDateTime' },
+                    { field: 'stopDateTime' },
+                    { field: 'name' },
+                    { field: 'sourceTypeIds', type: 'array', items: { type: 'string' } },
+                    { field: 'sourceId', type: 'array', items: { type: 'string' } },
+                    { field: 'details', type: 'object' },
+                    { field: 'isDisabled', type: 'boolean' }
+                ]
+            },
+            'watchlist.delete': {
+                title: 'Update Watchlist',
+                params: [
+                    { field: 'id', required: true },
+                ]
+            },
+            'watchlist.read': {
+                title: 'Read Watchlist',
+                params: [
+                    { field: 'id' },
+                    { field: 'minStartDateTime' },
+                    { field: 'maxStartDateTime' },
+                    { field: 'minStopDateTime' },
+                    { field: 'maxStopDateTime' },
+                    { field: 'offset', type: 'number' },
+                    { field: 'limit', type: 'number' },
+                    { field: 'orderBy', type: 'string', enum: ['createdDateTime', 'modifiedDateTime', 'stopDateTime', 'startDateTime', 'name'] },
+                    { field: 'orderDirection', type: 'string', enum: ['desc', 'asc'] },
+                    { field: 'isDisabled', type: 'boolean' }
+                ]
             }
+        }
+
+        const newInput = (obj, param) => {
+            const { title, field, type } = param;
+            const input = param.enum ?
+                $(`<select style="width:100%"></select>`) :
+                $(`<input type="${inputTypes[type] || 'text'}" style="width:100%">`);
+            if (param.enum) {
+                const opt = v => `<option value="${v}">${v}</option>`;
+                input.append((param.enum || []).map(opt));
+            }
+            input.val(obj[field]).on('change', () => obj[field] = input.val());
+            return input;
+        }
+
+        const paramForm = (obj, param) => {
+            const { title, field } = param;
+            const keyCell = $(`<span style="width:100%">${title || field}</span>`);
+            const valueCell = newInput(obj, param);
+            const row = $(`<tr></tr>`).append(
+                $('<td></td>').append(keyCell),
+                $('<td></td>').append(valueCell)
+            );
+            return row;
+        }
+
+        const paramListForm = (obj, params) => {
+            const table = $(`
+            <table class="table table-dense" style="width:100%; margin-bottom:6px">
+                <thead>
+                    <th>Key</th>
+                    <th>Value</th>
+                </thead>
+                <tbody></tbody>
+            </table>`);
+            table.find('tbody').append(
+                params.map(p => paramForm(obj, p))
+            );
+            return table;
+        }
+
+        const onCrudKeyChange = (cb) => {
+            const object = $("#node-input-object");
+            const action = $("#node-input-action");
+            const callback = () => cb(crudKey(object.val(), action.val()));
+            object.on("change", callback);
+            action.on("change", callback);
+        }
+
+        const renderForm = (data, key) => {
+            const { params } = Schemas[key] || {};
+            crudDataNode().empty().append(
+                Array.isArray(params) ?
+                    paramListForm(data.params, params) :
+                    null
+            );
         }
 
         RED.nodes.registerType('aiware-crud', {
@@ -54,7 +152,7 @@
                 name: { value: "" },
                 object: { value: "" },
                 action: { value: "" },
-                data: { value: {} }
+                actionData: { value: {} }
             },
             inputs: 1,
             outputs: 2,
@@ -66,18 +164,18 @@
             },
             oneditprepare: function () {
                 const { object, action } = this;
-                this.data = this.data || {};
+                this.actionData = this.actionData || {};
                 // set data into node
-                const key = crudKey(object, data);
-                const data = this.data[key] || {};
-                crudData(key, data);
-                const schema = createWatchlist;
+                const key = crudKey(object, action);
+                const data = { params: {}, props: {}, ...this.actionData[key] };
+                setCrudData(key, data);
+                onCrudKeyChange((key) => renderForm(data, key));
+                renderForm(data, key);
             },
             oneditsave: function () {
                 const { object, action } = this;
-                const key = crudKey(object, data);
-                const data = crudData(key);
-                this.data[key] = data;
+                const key = crudKey(object, action);
+                this.actionData[key] = getCrudData(key);
             }
         });
     })();
