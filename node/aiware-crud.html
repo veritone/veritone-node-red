@@ -19,9 +19,6 @@
             <option value="delete">Delete</option>
         </select>
     </div>
-    <div class="form-row">
-        <label><i class="icon-tag"></i> Parameters</label>
-    </di>
     <div id="input-for-crud-data"></div>
 </script>
 
@@ -37,57 +34,23 @@
             "boolean": "checkbox",
             "dateTime": "datetime"
         };
+        const loading = (text) => $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
+        const definitions = {};
+        const getDefinitions = (key) => new Promise((resolve, reject) => {
+            if (definitions[key]) {
+                resolve(definitions[key]);
+                return;
+            }
+            $.getJSON("/veritone/crud/schemas/" + key, function (data) {
+                if (data) { definitions[key] = data; }
+                resolve(data);
+            }).fail((e) => reject(e.responseJSON.message));
+        });
+
         const crudKey = (object, action) => `${object}.${action}`;
         const crudDataNode = () => $("#input-for-crud-data");
         const getCrudData = (key) => crudDataNode().data(key);
         const setCrudData = (key, data) => crudDataNode().data(key, data);
-        const Schemas = {
-            'watchlist.create': {
-                title: 'Create Watchlist',
-                params: [
-                    { field: 'startDateTime', type: 'string' },
-                    { field: 'stopDateTime', required: true, type: 'string' },
-                    { field: 'name', required: true },
-                    { field: 'sourceTypeIds', type: 'array', items: { type: 'string' } },
-                    { field: 'sourceId', type: 'array', items: { type: 'string' } },
-                    { field: 'details', type: 'object' }
-                ]
-            },
-            'watchlist.update': {
-                title: 'Update Watchlist',
-                params: [
-                    { field: 'id', required: true },
-                    { field: 'startDateTime' },
-                    { field: 'stopDateTime' },
-                    { field: 'name' },
-                    { field: 'sourceTypeIds', type: 'array', items: { type: 'string' } },
-                    { field: 'sourceId', type: 'array', items: { type: 'string' } },
-                    { field: 'details', type: 'object' },
-                    { field: 'isDisabled', type: 'boolean' }
-                ]
-            },
-            'watchlist.delete': {
-                title: 'Update Watchlist',
-                params: [
-                    { field: 'id', required: true },
-                ]
-            },
-            'watchlist.read': {
-                title: 'Read Watchlist',
-                params: [
-                    { field: 'id' },
-                    { field: 'minStartDateTime' },
-                    { field: 'maxStartDateTime' },
-                    { field: 'minStopDateTime' },
-                    { field: 'maxStopDateTime' },
-                    { field: 'offset', type: 'number' },
-                    { field: 'limit', type: 'number' },
-                    { field: 'orderBy', type: 'string', enum: ['createdDateTime', 'modifiedDateTime', 'stopDateTime', 'startDateTime', 'name'] },
-                    { field: 'orderDirection', type: 'string', enum: ['desc', 'asc'] },
-                    { field: 'isDisabled', type: 'boolean' }
-                ]
-            }
-        }
 
         const newInput = (obj, param) => {
             const { title, field, type } = param;
@@ -103,8 +66,9 @@
         }
 
         const paramForm = (obj, param) => {
-            const { title, field } = param;
-            const keyCell = $(`<span style="width:100%">${title || field}</span>`);
+            const { title, field, required } = param;
+            const label = `${title || field} ${required ? '(*)' : ''}`;
+            const keyCell = $(`<span style="width:100%">${label}</span>`);
             const valueCell = newInput(obj, param);
             const row = $(`<tr></tr>`).append(
                 $('<td></td>').append(keyCell),
@@ -128,21 +92,53 @@
             return table;
         }
 
+        const propListForm = (obj, props) => {
+            const nodes = props.map(function ({ field, checked }) {
+                const fieldNode = $(`<span> ${field}</span>`);
+                const checkbox = $(`<input type="checkbox" style="vertical-align: baseline">`);
+                checkbox.prop('checked', obj[field]);
+                checkbox.on('change', function () {
+                    obj[field] = checkbox.prop('checked');
+                });
+                return $('<div></div>').append(checkbox, fieldNode);
+            });
+            const div = $('<div></div>');
+            div.append(`<h5> Properties </h5>`, nodes);
+            return div;
+        }
+
         const onCrudKeyChange = (cb) => {
             const object = $("#node-input-object");
             const action = $("#node-input-action");
-            const callback = () => cb(crudKey(object.val(), action.val()));
+            const callback = () => {
+                const key = crudKey(object.val(), action.val());
+                if (key.length > 1) {
+                    cb(key);
+                }
+            };
             object.on("change", callback);
             action.on("change", callback);
         }
 
-        const renderForm = (data, key) => {
-            const { params } = Schemas[key] || {};
-            crudDataNode().empty().append(
-                Array.isArray(params) ?
-                    paramListForm(data.params, params) :
-                    null
-            );
+        const renderForm = (actionData, key) => {
+            const data = { params: {}, props: {}, ...actionData[key] };
+            setCrudData(key, data);
+            const crudNode = crudDataNode();
+            crudNode.empty().append(loading('preparing form ...'));
+            getDefinitions(key).then(schema => {
+                crudNode.empty();
+                const { params, props } = schema || {};
+                if (Array.isArray(params)) {
+                    crudNode.append(paramListForm(data.params, params));
+                } else {
+                    crudNode.append(`schema missing params definition`);
+                }
+                if (Array.isArray(props)) {
+                    crudNode.append(propListForm(data.props, props));
+                }
+            }).catch(e => {
+                crudDataNode().empty().append(`an error occur ${e}`);
+            });
         }
 
         RED.nodes.registerType('aiware-crud', {
@@ -165,12 +161,11 @@
             oneditprepare: function () {
                 const { object, action } = this;
                 this.actionData = this.actionData || {};
+                console.log(this.actionData);
                 // set data into node
                 const key = crudKey(object, action);
-                const data = { params: {}, props: {}, ...this.actionData[key] };
-                setCrudData(key, data);
-                onCrudKeyChange((key) => renderForm(data, key));
-                renderForm(data, key);
+                onCrudKeyChange((key) => renderForm(this.actionData, key));
+                renderForm(this.actionData, key);
             },
             oneditsave: function () {
                 const { object, action } = this;
