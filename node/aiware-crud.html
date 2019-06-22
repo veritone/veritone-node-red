@@ -19,6 +19,7 @@
             <option value="delete">Delete</option>
         </select>
     </div>
+    <input type="hidden" id="node-input-mtime">
     <div id="input-for-crud-data"></div>
 </script>
 
@@ -148,7 +149,8 @@
                 name: { value: "" },
                 object: { value: "" },
                 action: { value: "" },
-                actionData: { value: {} }
+                actionData: { value: {} },
+                mtime: { value: 0 }
             },
             inputs: 1,
             outputs: 2,
@@ -161,11 +163,14 @@
             oneditprepare: function () {
                 const { object, action } = this;
                 this.actionData = this.actionData || {};
-                console.log(this.actionData);
                 // set data into node
                 const key = crudKey(object, action);
                 onCrudKeyChange((key) => renderForm(this.actionData, key));
                 renderForm(this.actionData, key);
+                crudDataNode().on('change', () => {
+                    this.mtime = Date.now();
+                });
+                // console.log(this.actionData);
             },
             oneditsave: function () {
                 const { object, action } = this;
