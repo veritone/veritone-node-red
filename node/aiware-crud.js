@@ -2,6 +2,17 @@ const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { Schemas } = require('./aiware-crud-schemas');
 
+
+const mustache = require("mustache");
+const render = (tmpl, obj) => mustache.render(tmpl, obj);
+const renderObj = (props = {}, msg) => {
+    const res = {};
+    Object.keys(props).forEach(k => {
+        res[k] = render(props[k], msg);
+    });
+    return res;
+};
+
 const getRecords = ({ records = [] } = {}) => records;
 
 function makeArgHolder(types, params) {
@@ -35,9 +46,13 @@ function makePropList(props = []) {
 
 function filterParams(schema, params) {
     const res = {};
-    schema.params.forEach(p => {
+    (schema.params || []).forEach(p => {
         const v = params[p.field];
-        if (typeof v === 'string' && v === '') {
+        if (v === '' || typeof v === 'undefined') {
+            if (p.required) {
+                const title = p.title || p.field;
+                throw new Error(`missing required field ${title}`);
+            }
             return;
         }
         res[p.field] = v;
@@ -47,9 +62,9 @@ function filterParams(schema, params) {
 
 function filterProps(schema, props) {
     const res = [];
-    schema.props.forEach(p => {
+    (schema.props || []).forEach(p => {
         const v = props[p.field];
-        if (v === true) {
+        if (p.required || v === true) {
             res.push(p.field);
         }
     });
@@ -113,11 +128,67 @@ async function updateWatchlist(api, params) {
     return res;
 }
 
+async function readCollection(api, params, props) {
+    const types = {
+        id: 'ID',
+        name: 'String',
+        mentionId: 'ID',
+        offset: 'Int = 0',
+        limit: 'Int = 30'
+    };
+    const { argStr, holderStr } = makeArgHolder(types, params);
+    const query = `query ${argStr} { 
+        collections ${holderStr} { 
+            records { ${makePropList(props)} } 
+        } 
+    }`;
+    const variables = params;
+    const { collections: res } = await api.Query(query, variables);
+    return getRecords(res);
+}
+
+async function createCollection(api, params) {
+    const query = `mutation ($input: CreateCollection!) { 
+        createCollection(input: $input) {
+            id
+        }
+    }`;
+    const input = params;
+    const { createCollection: res } = await api.Query(query, { input });
+    return res;
+}
+
+async function deleteCollection(api, { id }) {
+    const query = `mutation ($id: ID!) { 
+        deleteCollection(id: $id) {
+            id
+        }
+    }`;
+    const { deleteCollection: res } = await api.Query(query, { id });
+    return res;
+};
+
+async function updateCollection(api, params) {
+    const query = `mutation ($input: UpdateCollection!) { 
+        updateCollection(input: $input) {
+            id
+        }
+    }`;
+    const input = params;
+    const { updateCollection: res } = await api.Query(query, { input });
+    return res;
+}
+
 const workers = {
     'watchlist.create': createWatchlist,
     'watchlist.update': updateWatchlist,
     'watchlist.delete': deleteWatchlist,
     'watchlist.read': readWatchlist,
+
+    'collection.create': createCollection,
+    'collection.update': updateCollection,
+    'collection.delete': deleteCollection,
+    'collection.read': readCollection,
 };
 
 function CreateNode(RED, node, config) {
@@ -137,12 +208,9 @@ function CreateNode(RED, node, config) {
         }
         const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
-        console.log(params, props);
-        worker(
-            api,
-            filterParams(schema, params),
-            filterProps(schema, props)
-        ).then(onSuccess).catch(onError);
+        const gqlParams = filterParams(schema, renderObj(params, msg.payload));
+        const gqlProps = filterProps(schema, props);
+        worker(api, gqlParams, gqlProps).then(onSuccess).catch(onError);
     });
 }
 

@@ -122,7 +122,8 @@
         }
 
         const renderForm = (actionData, key) => {
-            const data = { params: {}, props: {}, ...actionData[key] };
+            actionData[key] = actionData[key] || {params: {}, props: {}};
+            const data = actionData[key];
             setCrudData(key, data);
             const crudNode = crudDataNode();
             crudNode.empty().append(loading('preparing form ...'));

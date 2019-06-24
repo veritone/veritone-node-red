@@ -28,7 +28,8 @@
       "engine": "node/engine.js",
       "v2fIn": "node/v2fIn.js",
       "v2fOut": "node/v2fOut.js",
-      "v2f-in-test": "node/v2f-in-test.js"
+      "v2f-in-test": "node/v2f-in-test.js",
+      "aiware-crud": "node/aiware-crud.js"
     }
   }
 }
