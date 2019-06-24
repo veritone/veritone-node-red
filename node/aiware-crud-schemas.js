@@ -44,7 +44,7 @@ const Schemas = {
             { field: 'isDisabled', type: 'boolean' }
         ],
         props: [
-            { field: 'id' },
+            { field: 'id', required: true },
             { field: 'name' },
             { field: 'organizationId' },
             { field: 'scheduleIds' },
@@ -57,6 +57,51 @@ const Schemas = {
             { field: 'query' },
             { field: 'brandId' },
             { field: 'isDisabled' }
+        ]
+    },
+    'collection.create': {
+        title: 'Create a collection',
+        params: [
+            { field: 'name', required: true },
+            { field: 'folderDescription' },
+            { field: 'image' }
+        ]
+    },
+    'collection.update': {
+        title: 'Update a collection',
+        params: [
+            { field: 'folderId', title: 'id', required: true },
+            { field: 'name' },
+            { field: 'folderDescription' },
+            { field: 'image' }
+        ]
+    },
+    'collection.delete': {
+        title: 'Delete a collection',
+        params: [
+            { field: 'id' }
+        ]
+    },
+    'collection.read': {
+        title: 'Read Collection',
+        params: [
+            { field: 'id' },
+            { field: 'name' },
+            { field: 'mentionId' },
+            { field: 'offset', type: 'number' },
+            { field: 'limit', type: 'number' },
+        ],
+        props: [
+            { field: 'id', required: true },
+            { field: 'name' },
+            { field: 'imageUrl' },
+            { field: 'signedImageUrl' },
+            { field: 'ownerId' },
+            { field: 'description' },
+            { field: 'organizationId' },
+            { field: 'createdDateTime' },
+            { field: 'typeId' },
+            { field: 'isActive' }
         ]
     }
 }
