@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="aiware-object">
+<script type="text/x-red" data-template-name="aiware-objects">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -23,7 +23,7 @@
     <div id="input-for-crud-data"></div>
 </script>
 
-<script type="text/x-red" data-help-name="aiware-object">
+<script type="text/x-red" data-help-name="aiware-objects">
     <p>Webhook endpoint for Veritone events</p>
 </script>
 
@@ -42,7 +42,7 @@
                 resolve(definitions[key]);
                 return;
             }
-            $.getJSON("/veritone/crud/schemas/" + key, function (data) {
+            $.getJSON("/veritone/objects/schemas/" + key, function (data) {
                 if (data) { definitions[key] = data; }
                 resolve(data);
             }).fail((e) => reject(e.responseJSON.message));
@@ -143,7 +143,7 @@
             });
         }
 
-        RED.nodes.registerType('aiware-object', {
+        RED.nodes.registerType('aiware-objects', {
             category: 'aiWARE',
             color: "#b3e5fc",
             defaults: {
@@ -157,7 +157,7 @@
             outputs: 2,
             outputLabels: ["result", "error"],
             icon: "veritone-logo-transparent.png",
-            paletteLabel: "aiware-object",
+            paletteLabel: "aiware-objects",
             label: function () {
                 return this.name || "aiWARE crud";
             },
@@ -171,7 +171,6 @@
                 crudDataNode().on('change', () => {
                     this.mtime = Date.now();
                 });
-                // console.log(this.actionData);
             },
             oneditsave: function () {
                 const { object, action } = this;

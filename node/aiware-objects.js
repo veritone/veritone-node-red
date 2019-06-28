@@ -1,6 +1,6 @@
 const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
-const { Schemas } = require('./aiware-object-schemas');
+const { Schemas } = require('./aiware-objects-schemas');
 
 
 const mustache = require("mustache");
@@ -215,14 +215,14 @@ function CreateNode(RED, node, config) {
 }
 
 function registerHttpEndpoints(RED) {
-    RED.httpAdmin.get("/veritone/crud/schemas/:id", function (req, res) {
+    RED.httpAdmin.get("/veritone/objects/schemas/:id", function (req, res) {
         const { id } = req.params;
         res.json(Schemas[id]);
     });
 }
 
 module.exports = function (RED) {
-    const NodeName = 'aiware-object';
+    const NodeName = 'aiware-objects';
     if (RED.settings.httpNodeRoot !== false) {
         registerHttpEndpoints(RED);
     }
