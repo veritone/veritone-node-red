@@ -33,7 +33,7 @@
       "v2f-in": "node/v2f-in.js",
       "v2f-out": "node/v2f-out.js",
       "v2f-in-test": "node/v2f-in-test.js",
-      "aiware-object": "node/aiware-object.js",
+      "aiware-objects": "node/aiware-objects.js",
       "tensorflow-posenet": "node/tensorflow-posenet.js"
     }
   }
