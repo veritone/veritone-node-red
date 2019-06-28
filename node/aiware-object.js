@@ -1,6 +1,6 @@
 const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
-const { Schemas } = require('./aiware-crud-schemas');
+const { Schemas } = require('./aiware-object-schemas');
 
 
 const mustache = require("mustache");
@@ -222,7 +222,7 @@ function registerHttpEndpoints(RED) {
 }
 
 module.exports = function (RED) {
-    const NodeName = 'aiware-crud';
+    const NodeName = 'aiware-object';
     if (RED.settings.httpNodeRoot !== false) {
         registerHttpEndpoints(RED);
     }

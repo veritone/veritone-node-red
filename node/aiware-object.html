@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="aiware-crud">
+<script type="text/x-red" data-template-name="aiware-object">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -23,7 +23,7 @@
     <div id="input-for-crud-data"></div>
 </script>
 
-<script type="text/x-red" data-help-name="aiware-crud">
+<script type="text/x-red" data-help-name="aiware-object">
     <p>Webhook endpoint for Veritone events</p>
 </script>
 
@@ -143,7 +143,7 @@
             });
         }
 
-        RED.nodes.registerType('aiware-crud', {
+        RED.nodes.registerType('aiware-object', {
             category: 'aiWARE',
             color: "#b3e5fc",
             defaults: {
@@ -157,7 +157,7 @@
             outputs: 2,
             outputLabels: ["result", "error"],
             icon: "veritone-logo-transparent.png",
-            paletteLabel: "aiware-crud",
+            paletteLabel: "aiware-object",
             label: function () {
                 return this.name || "aiWARE crud";
             },
