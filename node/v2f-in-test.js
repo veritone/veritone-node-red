@@ -39,15 +39,16 @@ function registerHttpEndpoints(RED) {
             try {
                 const msgid = RED.util.generateId();
                 res._msgid = msgid;
-                const payload = { ...req.body };
+                const msgPayload = req.body;
+                const taskPayload = msgPayload.taskPayload || {};
                 const { customFields = [] } = node.config || {};
                 customFields.forEach(field => {
-                    payload[field.key] = field.value;
+                    taskPayload[field.key] = field.value;
                 });
                 const msg = {
                     _msgid: msgid, req: req,
                     res: CreateResponseWrapper(node, res),
-                    payload
+                    payload: msgPayload
                 };
                 node.send(msg);
                 res.sendStatus(200);
