@@ -46,5 +46,63 @@
 </script>
 
 <script type="text/x-red" data-help-name="event in">
-  <p>Webhook endpoint for Veritone events</p>
+  <p>
+    Receives event messages sent by webhook from the <code>aiWARE</code> eventing system and reads in the events as <code>payload</code> into the flow.
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        Event <span class="property-type">string</span>
+    </dt>
+    <dd>
+        the Event that the node is intended to read-in into the flow. This value corresponds to the <code>eventName</code> property value retrieved in the GraphQL query shown in the <span style="font-weight:bold;">References</span> section below
+    </dd>
+     <dt>
+        Type <span class="property-type">string</span>
+    </dt>
+    <dd>
+        This field expects the <code>eventType</code> value that can be retrieved from the GraphQL query shown in the <span style="font-weight:bold;">References</span> section below
+    </dd>
+    <dt>
+        App <span class="property-type">string</span>
+    </dt>
+    <dd>
+        This field expects the Application value that the Event is associated with. For default events, input <code>system</code>, otherwise input the <code>guid</code> of the Application that the custom event is associated with
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>
+                The payload contains the body of the aiWARE event read into the flow. The schema is displayed by including the <code>schemaData</code> as seen in the <span style="font-weight:bold;">References</span> section below
+             </dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<p>
+    The field <code>Event Name</code> expects the name of a valid Event available to the user’s Veritone Organization, either a “system” event that is default with every organization or custom events either defined by or shared with that Organization through Developer and their applications.
+    <br />
+    <br />
+    <span style="font-weight:bold;">Note:</span> This node will only work as expected in the Node-RED run time and will not work as expected if the flow is Deployed and running as an engine running on Veritone’s realtime framework.
+</p>
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://api.veritone.com/v3/graphiql?query=query">GraphiQL IDE</a> - link to the aiWARE GraphiQL IDE where you can run this query: 
+        <code>
+        <br /> query events{
+        <br />  events(application:"system"){
+        <br/>    records{
+        <br/>      eventName
+        <br/>      eventType
+        <br />     schemaData } } }
+        </code>
+    </li>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/applications/">aiWARE APIs</a> - Link to the Developer docs overview on building Applications on aiWARWE
+    </li>
+</ul>
 </script>
