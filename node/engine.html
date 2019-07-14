@@ -13,7 +13,36 @@
 </script>
 
 <script type="text/x-red" data-help-name="engine-processing">
-    <p>Engine Processing</p>
+    <p>
+    Process a file with a cognitive AI engine that is available to your aiWARAE organization without writing a GraphQL statement
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        Target ID <span class="property-type">string</span>
+    </dt>
+    <dd>
+        The ID of the <code>temporalDataObject</code> (aka Media File in aiWARE) intended for processing
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>Output JSON that contains the engine processing <code>Job</code> and the engine processing <code>tasks</code> defined by the node User nested in the <code>Job</code> object </dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<ul>
+    <li>
+        Select the engines you wish to process the Media File with by clicking <code>Add task</code>, then select the <code>Engine Category</code> followed by the <code>Engines</code> available to your orgaization in that category
+    </li>
+    <li>
+        <a href="https://docs.veritone.com/#/apis/job-quickstart/">Engine Docs</a> - Use the link to read more about aiWARE engine Jobs
+    </li>
+</ul>
 </script>
 
 <style>
