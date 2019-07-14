@@ -91,5 +91,54 @@
 </script>
 
 <script type="text/x-red" data-help-name="aiware-jobs">
-    Query jobs
+    <p>
+    Retrieve engine <code>Jobs</code> that have run in your aiWARE organization.
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        orgToken <span class="property-type">string</span>
+    </dt>
+    <dd>
+        Assign this variable to the an API token for the organization intended to perform this authorized API request on that aiWARE Organization (optional). If a value is not provided, this node will use the default API token provided for the Workflow or Engine
+    </dd>
+    <dt>
+        Limit <span class="property-type">integer</span>
+    </dt>
+    <dd>
+        Input an integer value to limit the number of <code>Job</code> records returned from this node
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>
+                The payload contains the Job object along with an array of <code>Tasks</code> object records nested in the Job payload
+             </dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<ul>
+    <li>
+        Select the desired Job and child Task fields from the node UI to be included in the <code>payload</code> object
+    </li>
+    <li>
+        The <code>Task</code> fields selected will return for each child task nested in an array of the parent Job
+    </li>
+</ul>
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/apis/data-model">aiWARE API Data Model</a> - Reference for how aiWARE Objects relate to each other in the API Data Model
+    </li>
+    <li>
+        <a href="https://docs.veritone.com/#/apis/job-quickstart/?id=check-the-job-status">Job Quickstart Guide</a> - documentation on API operations related to aiWARE engine Jobs
+    </li>
+    <li>
+        <a href="veritonedev.slack.com">Community Feedback</a> - Let us know if you have a use-case in mind for this node or general feedback on our Developer Commmunity Slack!
+    </li>
+</ul>
 </script>
