@@ -26,6 +26,33 @@
 
 <script type="text/x-red" data-help-name="tensorflow-posenet">
     <p> 
-        Run tensorflow posenet on an event
-    </p>
+    This is an <span style="font-weight:bold;">experimental</span> node created for testing the <code>Tensorflow Posenet</code> npm package for the purpose of returning coordinates of detected animal forms provided in media further upstream in the flow.
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        payload <span class="property-type">json</span>
+    </dt>
+    <dd>
+        The expected payload is a <code>chunk</code> message produced by Veritone's engine framework (V2F). The expected message has both a <code>msg.payload.type</code> value of <span style="font-weight:bold;">media_chunk</span> and a <code>msg.payload.mimeType</code> of an image mimetype including jpeg or png
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>Output JSON containing the information of the TF Posenet processing including the <code>score</code> returned as a <code>float</code> value along with an array of objects containing coordinates of detected <code>parts</code> (eg "eyes", "nose","face") </dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/standards/engine-output/">Veritone Standards</a> - Documentation for aiWARE supported standards for cognitive outputs
+    </li>
+    <li>
+        <a href="veritonedev.slack.com">Community Feedback</a> - This is an experimental node that we included in our <code>aiWARE</code> palette for Node-RED. Let us know if you have a use-case in mind for this node or Posenet in general in our Developer Commmunity Slack!
+    </li>
+</ul>
 </script>
