@@ -26,5 +26,32 @@
   </script>
 
 <script type="text/x-red" data-help-name="V2F Out">
-  <p> V2F output node </p>
+  <p>
+    <span style="font-weight:bold;">Experimental:</span> Attempts to process the inbound <code>payload</code> for returning back to the message queue of the aiWARE engine framework
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        payload <span class="property-type">json</span>
+    </dt>
+    <dd>
+        the payload is expected to be a pre-formatted json that is then sent to the aiWARE Engine framework message queue for writing the message as an <code>engine output</code> in aiWARE
+    </dd>
+</dl>
+<h3>Details</h3>
+<p>
+    This node is experimental which means that it may not behave as expected. For best experiences configuring Automation engines, reference the Cognitive Engine template in your Automate Studio
+</p> 
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/standards/engine-output/">Engine Outputs</a> - Developer docs on aiWARE Engine outputs
+    </li>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/standards/engine-output/?id=extending-the-standard">Extending the Standard</a> - Developer Docs on extending the standard for aiWARE Engine outputs
+    </li>
+    <li>
+        <a href="veritonedev.slack.com">Community Feedback</a> - Let us know if you have a use-case in mind for this node or general feedback on our Developer Commmunity Slack!
+    </li>
+</ul>
   </script>
