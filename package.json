@@ -6,13 +6,13 @@
     "@tensorflow-models/posenet": "^2.1.0",
     "@tensorflow/tfjs": "^1.2.2",
     "@tensorflow/tfjs-node": "^1.2.1",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "body-parser": "1.18.3",
     "canvas": "^2.5.0",
     "eslint-plugin-lodash": "^3.1.0",
     "is-utf8": "^0.2.1",
     "jsonschema": "^1.2.4",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "multer": "^1.4.1",
     "mustache": "^2.3.0",
     "superagent": "^4.0.0-beta.5"
@@ -30,9 +30,9 @@
       "create-tdo": "node/create-tdo.js",
       "structured-data": "node/structured-data.js",
       "engine": "node/engine.js",
-      "v2f-in": "node/v2f-in.js",
-      "v2f-out": "node/v2f-out.js",
-      "v2f-in-test": "node/v2f-in-test.js",
+      "engine-in": "node/engine-in.js",
+      "engine-out": "node/engine-out.js",
+      "engine-in-test": "node/engine-in-test.js",
       "aiware-objects": "node/aiware-objects.js",
       "tensorflow-posenet": "node/tensorflow-posenet.js"
     }
