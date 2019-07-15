@@ -43,7 +43,55 @@
 </style>
 
 <script type="text/x-red" data-help-name="v2f-in-test">
-    <p>V2F In Test </p>
+    <p>
+    This node injects a mock engine message payload into the flow for testing the various permutations of how a message could be formatted when sent to the flow while it is running as an engine
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        Engine Mode<span class="property-type">dropdown</span>
+    </dt>
+    <dd>
+        the <code>Engine Mode</code> refers to how the flow is expected to process media files when running on the engine framework runtime. The choices are Chunk, Batch, and Stream
+    </dd>
+    <dt>
+        File Type<span class="property-type">string</span>
+    </dt>
+    <dd>
+        an open string field with auto-suggested values for the different kinds of 
+    </dd>
+    <dt>
+        Custom Fields<span class="property-type">string</span>
+    </dt>
+    <dd>
+        use the Custom fields to define the field (Key) and a mock sample of data (Value) to imitate how custom fields designated for an Engine in the Veritone Developer App will impact the payload of the flow at engine runtime
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>Engine In Test Output
+         <dl class="message-properties">
+             <dt>payload <span class="property-type">json</span></dt>
+             <dd>the <code>payload</code> output is a JSON object that is formatted by the inputs defined by the user driven in part by the kind of engine (Cognitive or Automation) designed and expected behavior at engine runtime</dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<p>
+    This test node is designed to dynamically mock the payloads that would be formed when the flow is running on the aiWARE engine framework.
+    <br />
+    <br />
+    <span style="font-weight:bold;">Note:</span> the Stream <code>Engine Mode</code> is experimental and is not fully supported in beta
+</p>
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/processing-modes/">aiWARE Engine Modes</a> - Read more on the three types of Engine Processing Modes that run on the aiWARE engine framework
+    </li>
+    <li>
+        <a href="veritonedev.slack.com">Community Feedback</a> - Let us know if you have a use-case in mind for this node or general feedback on our Developer Commmunity Slack!
+    </li>
+</ul>
 </script>
 
 <script type="text/javascript">
