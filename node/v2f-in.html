@@ -23,5 +23,49 @@
   </script>
   
   <script type="text/x-red" data-help-name="V2F in">
-      <p>Endpoint for V2F </p>
+      <p>Sends messages from Veritone's engine framework (aka V2F or realtime) into the flow when running as an Autmation engine. This node is specific to Veritone's runtime and will not interact with the Node-RED runtime within Automate Studio </p>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <!-- Commenting this section out until the `test` node functionality is incorporated
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>Test </dd>
+         </dl>
+     </li>
+     -->
+     <li>V2F Media Chunk Message output
+         <dl class="message-properties">
+             <dt>payload <span class="property-type">json</span></dt>
+             <dd>the standard output of the aiWARE engine framework as a message injected into the flow when running as an engine (engine runtime)</dd>
+         </dl>
+     </li>
+     <li>V2F "Other" output
+         <dl class="message-properties">
+             <dt>payload <span class="property-type">json</span></dt>
+             <dd>Other miscallaneous engine messages may be routed through the workflow. Check if <code>msg.payload.type === "media_chunk"</code> and that the <code>msg.payload.mimeType</code> is also equal to media files you expect to process. See Details for more info. </dd>
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<p>The <code>engine in</code> node abstracts away the Veritone engine framework from workflow creators in Node-RED. This node is only relevant for users building workflows with the intent to run those workflows as Veritone Node-RED engines that can take adavantage of the framework abilities to horizontally scale the workflow workloads.</p>
+<h4>Handling miscallaneous engine messages</h4>
+<p>It is necessary to handle for other kinds of messages that are irrelevant for the workflow running as an engine task but that are nonethless fed into the engine queue. This is done by:</p>
+<ul>
+    <li>
+        Evaluating the <code>payload.Type</code> and the <code>payload.mimeType</code>. If the values are not media_chunk and the expected mimeType respectively, the msg is not sent to the AI cognition for processing
+    </li>
+    <li>
+        Instead, the message is routed to an <code>http response</code> node with a <code>statusCode</code> of <span style="font-weight:bold">204</span> that instructs the aiWARE engine framework to ignore the message
+    </li>
+</ul>
+<h3>References</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/processing-modes/">aiWARE Engine Modes</a> - Read more on the three types of Engine Processing Modes that run on the aiWARE engine framework
+    </li>
+    <li>
+        <a href="https://docs.veritone.com/#/developer/engines/testing-and-debugging/">Engine Testing and Debugging</a> - More general documentation on engine testing and debugging. Automate Studio helps developers test within the studio itself, this is nonetheless a good subject overview
+    </li>
+</ul>
   </script>
