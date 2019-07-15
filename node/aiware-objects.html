@@ -24,7 +24,45 @@
 </script>
 
 <script type="text/x-red" data-help-name="aiware-objects">
-    <p>Webhook endpoint for Veritone events</p>
+    <p>
+    Easily create, query, delete, or update standard aiWARE objects including <code>Collections</code> and <code>Watchlists</code>
+</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    <dt>
+        Object <span class="property-type">dropdown</span>
+    </dt>
+    <dd>
+        Dropdown selection of the aiWARE object intended for a specific operation to be performed on
+    </dd>
+    <dt>
+        Action <span class="property-type">dropdown</span>
+    </dt>
+    <dd>
+        Dropdown selection of the action to perform on the aiWARE object. Choices include Create, Read, Update, or Delete
+    </dd>
+    <dt>
+        Filter <span class="property-type">string</span>
+    </dt>
+    <dd>
+        When the aiWARE object and intended action have been selected, the Filters become available to narrow down the aiWARE objects for the operation to be performed on
+    </dd>
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+     <li>
+        <dl class="message-properties">
+            <dt>payload <span class="property-type">json</span></dt>
+             <dd>Output JSON that contains the details of the aiWARE object that was selected from the dropdown along with the selected fields from that aiWARE object
+         </dl>
+     </li>
+</ol>
+<h3>Details</h3>
+<ul>
+    <li>
+        <a href="https://docs.veritone.com/#/apis/data-model">aiWARE API Data Model</a> - Reference for how aiWARE Objects relate to each other in the API Data Model
+    </li>
+</ul>
 </script>
 
 <script type="text/javascript">
