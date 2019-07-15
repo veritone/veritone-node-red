@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="v2f-in-test">
+<script type="text/x-red" data-template-name="engine-in-test">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -42,7 +42,7 @@
     }
 </style>
 
-<script type="text/x-red" data-help-name="v2f-in-test">
+<script type="text/x-red" data-help-name="engine-in-test">
     <p>
     This node injects a mock engine message payload into the flow for testing the various permutations of how a message could be formatted when sent to the flow while it is running as an engine
 </p>
@@ -95,7 +95,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('v2f-in-test', {
+    RED.nodes.registerType('engine-in-test', {
         category: 'aiWARE',
         color: "#b3e5fc",
         defaults: {
@@ -108,9 +108,9 @@
         inputs: 0,
         outputs: 2,
         icon: "veritone-logo-transparent.png",
-        paletteLabel: "V2F In Test",
+        paletteLabel: "engine in test",
         label: function () {
-            return this.name || "V2F In Test";
+            return this.name || "engine in test";
         },
         oneditprepare: function () {
             $("#node-input-mimeType").typeahead({
@@ -196,13 +196,13 @@
                 }
                 var node = this;
                 $.ajax({
-                    url: "veritone/v2f-in-test/" + this.id,
+                    url: "veritone/engine-in-test/" + this.id,
                     type: "POST",
                     contentType: 'application/json',
                     data: node.testPayload,
                     success: function (resp) {
                         var label = node.name;
-                        RED.notify(node._("inject.v2f-in.success", { label: label }), "success");
+                        RED.notify(node._("inject.engine-in.success", { label: label }), "success");
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('V2F In',{
+    RED.nodes.registerType('engine-in',{
       category: 'aiWARE',
       color:"#b3e5fc",
       defaults: {
@@ -8,21 +8,21 @@
       inputs:0,
       outputs:1,
       icon: "veritone-logo-transparent.png",
-      paletteLabel: "V2F In",
+      paletteLabel: "engine in",
       label: function() {
-        return this.name || "V2F In";
+        return this.name || "engine in";
       }
     });
   </script>
   
-  <script type="text/x-red" data-template-name="V2F In">
+  <script type="text/x-red" data-template-name="engine-in">
       <div class="form-row">
           <label for="node-input-name"><i class="icon-tag"></i> Name</label>
           <input type="text" id="node-input-name" placeholder="Name">
       </div>
   </script>
   
-  <script type="text/x-red" data-help-name="V2F in">
+  <script type="text/x-red" data-help-name="engine-in">
       <p>Sends messages from Veritone's engine framework (aka V2F or realtime) into the flow when running as an Autmation engine. This node is specific to Veritone's runtime and will not interact with the Node-RED runtime within Automate Studio </p>
 <h3>Outputs</h3>
 <ol class="node-ports">

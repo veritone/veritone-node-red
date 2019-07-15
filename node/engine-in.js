@@ -212,5 +212,5 @@ module.exports = function (RED) {
             this.warn(RED._("httpin.errors.not-created"));
         }
     }
-    RED.nodes.registerType("V2F In", StartProcessing);
+    RED.nodes.registerType("engine-in", StartProcessing);
 }

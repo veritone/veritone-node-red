@@ -54,17 +54,17 @@ function registerHttpEndpoints(RED) {
                 res.sendStatus(200);
             } catch (err) {
                 res.sendStatus(500);
-                node.error(RED._("inject.v2f-in.failed", { error: err.toString() }));
+                node.error(RED._("inject.engine-in.failed", { error: err.toString() }));
             }
         } else {
             res.sendStatus(404);
         }
     }
-    RED.httpNode.post("/veritone/v2f-in-test/:id", jsonParser, handler, errorHandler);
+    RED.httpNode.post("/veritone/engine-in-test/:id", jsonParser, handler, errorHandler);
 }
 
 module.exports = function (RED) {
-    const NodeName = 'v2f-in-test';
+    const NodeName = 'engine-in-test';
     if (RED.settings.httpNodeRoot !== false) {
         try {
             registerHttpEndpoints(RED);

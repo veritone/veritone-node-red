@@ -1,7 +1,7 @@
 module.exports = function (RED) {
     "use strict";
 
-    function v2fOut(n) {
+    function engineOut(n) {
         RED.nodes.createNode(this, n);
         var node = this;
         this.headers = n.headers || {};
@@ -74,5 +74,5 @@ module.exports = function (RED) {
             }
         });
     }
-    RED.nodes.registerType("V2F Out", v2fOut);
+    RED.nodes.registerType("engine-out", engineOut);
 }
