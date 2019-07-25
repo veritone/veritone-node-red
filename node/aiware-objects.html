@@ -120,7 +120,7 @@
             const table = $(`
             <table class="table table-dense" style="width:100%; margin-bottom:6px">
                 <thead>
-                    <th>Key</th>
+                    <th>Field</th>
                     <th>Value</th>
                 </thead>
                 <tbody></tbody>
@@ -142,7 +142,7 @@
                 return $('<div></div>').append(checkbox, fieldNode);
             });
             const div = $('<div></div>');
-            div.append(`<h5> Properties </h5>`, nodes);
+            div.append(`<h5> Fields </h5>`, nodes);
             return div;
         }
 
