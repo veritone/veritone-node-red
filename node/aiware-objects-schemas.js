@@ -107,13 +107,20 @@ const Schemas = {
     'folder.read' : {
         title: 'Read Folder',
         params: [
-            { field: 'id' },
+            { field: 'id', required: true},
         ],
         props: [
             { field: 'id'},
             { field: 'name'},
             { field: 'description'},
             { field: 'childFolders{count}' }
+        ]
+    },
+    'folder.update' : {
+        title: 'Update Folder',
+        params: [
+            { field: 'id', required: true},
+            { field: 'name', required: true}
         ]
     }
 }

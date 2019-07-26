@@ -197,6 +197,21 @@ async function readFolder(api, params, props) {
     return result;
 }
 
+async function updateFolder(api, params) {
+    const query = `mutation ($input: UpdateFolder!) { 
+        updateFolder(input: $input) {
+            id
+            name
+        }
+    }`;
+    const input = params;
+    const { updateFolder: res } = await api.Query(query, { input });
+    const result = {
+        "folder": res
+    };
+    return result;
+}
+
 const workers = {
     'watchlist.create': createWatchlist,
     'watchlist.update': updateWatchlist,
@@ -208,7 +223,8 @@ const workers = {
     'collection.delete': deleteCollection,
     'collection.read': readCollection,
 
-    'folder.read' : readFolder
+    'folder.read' : readFolder,
+    'folder.update' : updateFolder
 };
 
 function CreateNode(RED, node, config) {
