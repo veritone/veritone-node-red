@@ -108,13 +108,11 @@ const Schemas = {
         title: 'Read Folder',
         params: [
             { field: 'id' },
-            { field: 'name' },
-            { field: 'description'}
         ],
         props: [
             { field: 'id', required: true},
-            { field: 'description'}
-        ]
+            { field: 'name'},
+            { field: 'description'},        ]
     }
 }
 
