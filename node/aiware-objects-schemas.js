@@ -103,6 +103,18 @@ const Schemas = {
             { field: 'typeId' },
             { field: 'isActive' }
         ]
+    },
+    'folder.read' : {
+        title: 'Read Folder',
+        params: [
+            { field: 'id' },
+            { field: 'name' },
+            { field: 'description'}
+        ],
+        props: [
+            { field: 'id', required: true},
+            { field: 'description'}
+        ]
     }
 }
 
