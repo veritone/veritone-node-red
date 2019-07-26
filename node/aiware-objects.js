@@ -180,17 +180,17 @@ async function updateCollection(api, params) {
 }
 
 async function readFolder(api, params, props) {
-    const types = {
-        id: 'ID!',
-        name: 'String',
-        description: 'String'
-    };
-    const { argStr, holderStr } = makeArgHolder(types, params);
-    const query = `query ${argStr} { 
-        folder ${holderStr} { 
+    // const types = {
+    //     id: 'ID!',
+    //     name: 'String',
+    //     description: 'String'
+    // };
+    // const { argStr, holderStr } = makeArgHolder(types, params);
+    const query = `query getFolderInfo { 
+        folder (id: "a2ffa06d-1595-4148-a10d-0cf40ab8d8e2") { 
             name
             description
-            
+            id
         } 
     }`;
     const variables = params;
