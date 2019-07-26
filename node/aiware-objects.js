@@ -179,6 +179,25 @@ async function updateCollection(api, params) {
     return res;
 }
 
+async function readFolder(api, params, props) {
+    const types = {
+        id: 'ID',
+        name: 'String',
+        description: 'String'
+    };
+    const { argStr, holderStr } = makeArgHolder(types, params);
+    const query = `query ${argStr} { 
+        folder ${holderStr} { 
+            name
+            description
+            
+        } 
+    }`;
+    const variables = params;
+    const { folder: res } = await api.Query(query, variables);
+    return getRecords(res);
+}
+
 const workers = {
     'watchlist.create': createWatchlist,
     'watchlist.update': updateWatchlist,
@@ -189,6 +208,8 @@ const workers = {
     'collection.update': updateCollection,
     'collection.delete': deleteCollection,
     'collection.read': readCollection,
+
+    'folder.read' : readFolder
 };
 
 function CreateNode(RED, node, config) {
