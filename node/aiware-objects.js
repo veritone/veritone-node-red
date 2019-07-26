@@ -181,7 +181,7 @@ async function updateCollection(api, params) {
 
 async function readFolder(api, params, props) {
     const types = {
-        id: 'ID',
+        id: 'ID!',
         name: 'String',
         description: 'String'
     };
