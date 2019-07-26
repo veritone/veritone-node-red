@@ -110,13 +110,13 @@ const Schemas = {
             { field: 'id' },
         ],
         props: [
-            { field: 'id', required: true},
+            { field: 'id'},
             { field: 'name'},
-            { field: 'description'},        ]
+            { field: 'description'},
+            { field: 'childFolders{count}' }
+        ]
     }
 }
-
-
 
 
 module.exports = {
