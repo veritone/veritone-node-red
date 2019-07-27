@@ -191,10 +191,7 @@ async function readFolder(api, params, props) {
     }`;
     const variables = params;
     const { folder: res } = await api.Query(query, variables);
-    const result = {
-        "folder": res
-    };
-    return result;
+    return {'folder': res};
 }
 
 async function updateFolder(api, params) {
@@ -206,10 +203,7 @@ async function updateFolder(api, params) {
     }`;
     const input = params;
     const { updateFolder: res } = await api.Query(query, { input });
-    const result = {
-        "folder": res
-    };
-    return result;
+    return {'folder': res};
 }
 
 const workers = {
