@@ -110,10 +110,9 @@ const Schemas = {
             { field: 'id', required: true},
         ],
         props: [
-            { field: 'id'},
-            { field: 'name'},
-            { field: 'description'},
-            { field: 'childFolders{count}' }
+            { field: 'id' },
+            { field: 'name' },
+            { field: 'description' },
         ]
     },
     'folder.update' : {
