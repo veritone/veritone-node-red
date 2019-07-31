@@ -103,10 +103,26 @@ const Schemas = {
             { field: 'typeId' },
             { field: 'isActive' }
         ]
+    },
+    'folder.read' : {
+        title: 'Read Folder',
+        params: [
+            { field: 'id', required: true},
+        ],
+        props: [
+            { field: 'id' },
+            { field: 'name' },
+            { field: 'description' },
+        ]
+    },
+    'folder.update' : {
+        title: 'Update Folder',
+        params: [
+            { field: 'id', required: true},
+            { field: 'name', required: true}
+        ]
     }
 }
-
-
 
 
 module.exports = {
