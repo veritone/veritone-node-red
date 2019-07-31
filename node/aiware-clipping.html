@@ -1,0 +1,76 @@
+<script type="text/x-red" data-template-name="aiware-clipping">
+    <div class="form-row">
+        <label for="node-input-tdoId"> tdo ID </label>
+        <input type="string" id="node-input-tdoId" style="width:70%">
+        <input type="hidden" id="node-input-tdoIdType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-startOffsetMs">Start offset Ms</label>
+        <input type="string" id="node-input-startOffsetMs" style="width:70%">
+        <input type="hidden" id="node-input-startOffsetMsType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-endOffsetMs">End offset Ms</label>
+        <input type="string" id="node-input-endOffsetMs" style="width:70%">
+        <input type="hidden" id="node-input-endOffsetMsType">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="aiware-clipping">
+<p>Media clipping</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+
+</ol>
+<h3>Details</h3>
+<ul>
+</ul>
+</script>
+
+<script type="text/javascript">
+    (function () {
+        RED.nodes.registerType('aiware-clipping', {
+            category: 'aiWARE',
+            color: "#b3e5fc",
+            defaults: {
+              tdoId: { value: "", validate: RED.validators.typedInput("tdoIdType") },
+              tdoIdType: { value: "str" },
+              startOffsetMs: { value: "", validate: RED.validators.typedInput("startOffsetMsType") },
+              startOffsetMsType: { value: "str" },
+              endOffsetMs: { value: "", validate: RED.validators.typedInput("endOffsetMsType") },
+              endOffsetMsType: { value: "str" }
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "aiware-clipping",
+            label: function () {
+                return this.name || "aiware clipping";
+            },
+            oneditprepare: function () {
+              var that = this;
+              var fields = ["tdoId", "startOffsetMs", "endOffsetMs"];
+              $.each(fields, function (index, field) {
+                  $("#node-input-" + field + "Type").val(that[field + "Type"]);
+                  $("#node-input-" + field).typedInput({
+                      default: 'str',
+                      typeField: $("#node-input-" + field + "Type"),
+                      types: ['str', 'msg']
+                  });
+              });
+            },
+            oneditsave: function () {
+              var that = this;
+              var fields = ["tdoId", "startOffsetMs", "endOffsetMs"];
+              $.each(fields, function (index, field) {
+                  that[field + "Type"] = $("#node-input-" + field + "Type").val();
+              });
+            }
+        });
+    })();
+</script>
