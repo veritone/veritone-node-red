@@ -29,7 +29,7 @@
       "me": "node/me.js",
       "create-tdo": "node/create-tdo.js",
       "structured-data": "node/structured-data.js",
-      "engine": "node/engine.js",
+      "ai-processing": "node/engine.js",
       "engine-in": "node/engine-in.js",
       "engine-out": "node/engine-out.js",
       "engine-in-test": "node/engine-in-test.js",
