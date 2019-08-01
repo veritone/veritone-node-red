@@ -70,7 +70,7 @@ module.exports = function (RED) {
     if (RED.settings.httpNodeRoot !== false) {
         registerHttpEndpoints(RED);
     }
-    const NodeName = 'engine-processing';
+    const NodeName = 'ai-processing';
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
         CreateNode(RED, this, config);
