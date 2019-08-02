@@ -35,7 +35,7 @@ function CreateNode(RED, node, config) {
 }
 
 module.exports = function (RED) {
-    const NodeName = 'create-tdo';
+    const NodeName = 'create-file';
     RED.nodes.registerType(NodeName, function (config) {
         RED.nodes.createNode(this, config);
         CreateNode(RED, this, config);

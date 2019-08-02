@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="create-tdo">
+<script type="text/x-red" data-template-name="create-file">
     <div class="form-row">
         <label for="node-input-uri"><i class="fa fa-link"></i> URI </label>
         <input type="text" id="node-input-uri" style="width:70%">
@@ -51,7 +51,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('create-tdo', {
+    RED.nodes.registerType('create-file', {
         category: 'aiWARE',
         color: '#b3e5fc',
         defaults: {
@@ -75,7 +75,7 @@
         outputs: 2,
         outputLabels: ["result", "error"],
         icon: "veritone-logo-transparent.png",
-        paletteLabel: "create-tdo",
+        paletteLabel: "create-file",
         align: "right",
         label: function () {
             return this.name || this.tdoName || "create file";
@@ -101,7 +101,7 @@
     });
 </script>
 
-<script type="text/x-red" data-help-name="create-tdo">
+<script type="text/x-red" data-help-name="create-file">
     <p>Creates a media file that in aiWARE is stored as a <code>TemporalDataObject</code> (also known as TDO) along with a child <code>asset</code> that is a link to the specific media file path. </p>
 
 <h3>Inputs</h3>

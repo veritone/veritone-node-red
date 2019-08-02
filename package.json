@@ -27,7 +27,7 @@
       "graphql": "node/graphql.js",
       "jobs": "node/jobs.js",
       "me": "node/me.js",
-      "create-tdo": "node/create-tdo.js",
+      "create-file": "node/create-file.js",
       "structured-data": "node/structured-data.js",
       "ai-processing": "node/engine.js",
       "engine-in": "node/engine-in.js",
