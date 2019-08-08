@@ -14,6 +14,7 @@
         <input type="string" id="node-input-endOffsetMs" style="width:70%">
         <input type="hidden" id="node-input-endOffsetMsType">
     </div>
+    <div id="input-engine-category"></div>
 </script>
 
 <script type="text/x-red" data-help-name="aiware-clipping">
@@ -33,6 +34,66 @@
 
 <script type="text/javascript">
     (function () {
+      function getAndCache(url) {
+            var cache = null;
+            return function (done) {
+                if (cache) {
+                    done(cache);
+                    return;
+                }
+                $.getJSON(url, function (data) {
+                    if (data) { cache = data; }
+                    done(data);
+                }, console.log);
+            }
+        }
+        var getEngineCategories = getAndCache("/veritone/engineCategories");
+
+        function findById(data, id) {
+            var i, d;
+            for (i = 0; i < data.length; i++) {
+                if (data[i].id === id) {
+                    return data[i];
+                }
+            }
+            return null;
+        }
+
+        function newSelectNode(data, title) {
+            var node = $("<select id='node-input-engineCategoryId'></select>");
+            node.append(
+                $("<option disabled value=''> -- " + title + " -- </option>")
+            );
+            $.each(data, function (index, s) {
+                node.append(
+                    $("<option value='" + s.id + "'>" + s.name + "</option>")
+                );
+            });
+            return node;
+        }
+
+        function showEngineCategoryForm() {
+            getEngineCategories(function (data) {
+                var engineCategoryInput = newSelectNode(data, "Select engine category");
+                var engineCategoryForm = $(`<div class="form-row"></div>`).append(
+                    `<label for="node-input-engineCategoryId"><i class="fa fa-cogs"></i> Category</label>`,
+                    engineCategoryInput
+                );
+                var engineCategoryId;
+                engineCategoryInput.on("change", function () {
+                    var category = findById(data, engineCategoryInput.val());
+                    if (category) {
+                      engineCategoryId = category.id
+                    }
+                });
+                $("#input-engine-category").append(engineCategoryForm);
+                engineCategoryInput.val(engineCategoryId);
+                engineCategoryInput.change();
+            });
+        }
+
+
+
         RED.nodes.registerType('aiware-clipping', {
             category: 'aiWARE',
             color: "#b3e5fc",
@@ -63,6 +124,7 @@
                       types: ['str', 'msg']
                   });
               });
+              showEngineCategoryForm();
             },
             oneditsave: function () {
               var that = this;
@@ -70,6 +132,7 @@
               $.each(fields, function (index, field) {
                   that[field + "Type"] = $("#node-input-" + field + "Type").val();
               });
+              that["engineCategoryType"] = $("#engineCategoryId").val();
             }
         });
     })();
