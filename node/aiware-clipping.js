@@ -1,11 +1,10 @@
-const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
+const { NewVeritoneAPI } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { get } = require('lodash');
 const axios = require("axios");
 const request = require('superagent');
 const fs = require('fs');
 const path = require('path');
-const FormData = require('form-data');
 const mkdirp = require('mkdirp');
 const Promise = require('bluebird');
 
@@ -40,40 +39,34 @@ async function getEngineCategories(api) {
   return formatRecords(engineCategories);
 };
 
-async function createAsset(input, node) {
-  const destination = path.join(__dirname, `../uploads/${input.tdoId}.mp4`);
-  return readFileAsync(destination).then(data => {
-    const form_data = new FormData();
-    form_data.append("file", data);
-
+async function createAsset(input, node, file) {
+  return readFileAsync(file.destination).then(data => {
     let query =  `mutation {
       createAsset(input: {
         containerId: "${input.tdoId}"
-        contentType: "video/mp4"
+        contentType: "${file.contentType}"
         assetType: "media"
       }) {
         id
         uri
       }
     }`;
-    node.log(query);
 
     let headers = {
       Authorization:  `Bearer ${process.env.API_TOKEN}`,
     };
-    const fileName = `${input.tdoId}.mp4`
     return request
       .post(VERITONE_API_BASE_URL + "/v3/graphql", )
       .set(headers)
       .field('query', query)
-      .field('filename', fileName)
-      .attach('file', Buffer.from(data, 'utf8'), fileName)
+      .field('filename', file.fileName)
+      .attach('file', Buffer.from(data, 'utf8'), file.fileName)
       .end(function gotResponse(err, response) {
         if (!err) {
           let responseData = JSON.parse(response.text);
           node.log("new asset created with id "+ responseData.data.createAsset.id);
+          return responseData;
         }
-        
       });
   });
 }
@@ -89,10 +82,16 @@ async function downloadFile(input, node) {
   axios({
       method: "GET", url, responseType: 'arraybuffer', headers, timeout: 30000
   }).then( res => {
-    const destination = path.join(__dirname,`../uploads/${input.tdoId}.mp4`);
-    return mkdirpAsync(getDirName(destination)).then(() => {
-      fs.writeFileSync(destination, res);
-      createAsset(input, node);
+    const fileName = res.headers['content-disposition'].split('="').pop().split('"')[0];
+    node.log(fileName);
+    const file = {
+      fileName,
+      contentType: res.headers['content-type'],
+      destination: path.join(__dirname,`../uploads/${fileName}`)
+    };
+    return mkdirpAsync(getDirName(file.destination)).then(() => {
+      fs.writeFileSync(file.destination, res);
+      createAsset(input, node, file);
     });
   }).catch(err => {
     return err;
@@ -112,8 +111,11 @@ function CreateNode(RED, node, config) {
       fields.forEach(field => {
           input[field] = fieldValue(config, field, msg);
       });
-      const { onError, onSuccess } = NewOutput(node, msg);
-      downloadFile(input, node).then(onSuccess).catch(onError);
+      const { onError, onSuccess, onRequesting } = NewOutput(node, msg);
+      downloadFile(input, node)
+        .then(onRequesting)
+        .then(onSuccess)
+        .catch(onError);
     });
     
 }

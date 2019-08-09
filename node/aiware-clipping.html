@@ -63,6 +63,7 @@
             var node = $("<select id='node-input-engineCategoryId'></select>");
             node.append(
                 $("<option disabled value=''> -- " + title + " -- </option>")
+                  .attr("selected", "selected")
             );
             $.each(data, function (index, s) {
                 node.append(
@@ -72,27 +73,18 @@
             return node;
         }
 
-        function showEngineCategoryForm() {
+        function showEngineCategoryForm(engineCategoryId) {
             getEngineCategories(function (data) {
                 var engineCategoryInput = newSelectNode(data, "Select engine category");
                 var engineCategoryForm = $(`<div class="form-row"></div>`).append(
                     `<label for="node-input-engineCategoryId"><i class="fa fa-cogs"></i> Category</label>`,
                     engineCategoryInput
                 );
-                var engineCategoryId;
-                engineCategoryInput.on("change", function () {
-                    var category = findById(data, engineCategoryInput.val());
-                    if (category) {
-                      engineCategoryId = category.id
-                    }
-                });
                 $("#input-engine-category").append(engineCategoryForm);
                 engineCategoryInput.val(engineCategoryId);
                 engineCategoryInput.change();
             });
         }
-
-
 
         RED.nodes.registerType('aiware-clipping', {
             category: 'aiWARE',
@@ -103,7 +95,8 @@
               startOffsetMs: { value: "", validate: RED.validators.typedInput("startOffsetMsType") },
               startOffsetMsType: { value: "str" },
               endOffsetMs: { value: "", validate: RED.validators.typedInput("endOffsetMsType") },
-              endOffsetMsType: { value: "str" }
+              endOffsetMsType: { value: "str" },
+              engineCategoryId: { value: "" }
             },
             inputs: 1,
             outputs: 2,
@@ -124,7 +117,7 @@
                       types: ['str', 'msg']
                   });
               });
-              showEngineCategoryForm();
+              showEngineCategoryForm(that.engineCategoryId);
             },
             oneditsave: function () {
               var that = this;
@@ -132,7 +125,7 @@
               $.each(fields, function (index, field) {
                   that[field + "Type"] = $("#node-input-" + field + "Type").val();
               });
-              that["engineCategoryType"] = $("#engineCategoryId").val();
+              that["engineCategoryId"] = $("#node-input-engineCategoryId").val();
             }
         });
     })();
