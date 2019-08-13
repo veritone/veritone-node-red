@@ -17,7 +17,7 @@ if (!VERITONE_API_BASE_URL.startsWith("http")) {
   VERITONE_API_BASE_URL = "https://" + VERITONE_API_BASE_URL;
 }
 const fields = [
-  "tdoId", "startOffsetMs", "endOffsetMs"
+  "tdoId", "startOffsetMs", "endOffsetMs", "engineCategoryId"
 ];
 
 const formatRecords = (data) =>
@@ -45,6 +45,7 @@ async function createAsset(input, node, file) {
       createAsset(input: {
         containerId: "${input.tdoId}"
         contentType: "${file.contentType}"
+        details: "{ 'engineCategoryId': ${input.engineCategoryId} }"
         assetType: "media"
       }) {
         id
@@ -67,6 +68,7 @@ async function createAsset(input, node, file) {
           node.log("new asset created with id "+ responseData.data.createAsset.id);
           return responseData;
         }
+        node.log(err);
       });
   });
 }
@@ -83,7 +85,6 @@ async function downloadFile(input, node) {
       method: "GET", url, responseType: 'arraybuffer', headers, timeout: 30000
   }).then( res => {
     const fileName = res.headers['content-disposition'].split('="').pop().split('"')[0];
-    node.log(fileName);
     const file = {
       fileName,
       contentType: res.headers['content-type'],

@@ -49,6 +49,10 @@
         }
         var getEngineCategories = getAndCache("/veritone/engineCategories");
 
+        function newLoadingNode(text) {
+            return $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
+        }
+
         function findById(data, id) {
             var i, d;
             for (i = 0; i < data.length; i++) {
@@ -74,13 +78,17 @@
         }
 
         function showEngineCategoryForm(engineCategoryId) {
+            var loading = newLoadingNode("Loading engine category");
+            $("#input-engine-category").append(loading);
             getEngineCategories(function (data) {
                 var engineCategoryInput = newSelectNode(data, "Select engine category");
                 var engineCategoryForm = $(`<div class="form-row"></div>`).append(
                     `<label for="node-input-engineCategoryId"><i class="fa fa-cogs"></i> Category</label>`,
                     engineCategoryInput
                 );
+                loading.remove();
                 $("#input-engine-category").append(engineCategoryForm);
+                $("#input-engine-category").append("<input type='hidden' id='node-input-engineCategoryIdType' value='str'>");
                 engineCategoryInput.val(engineCategoryId);
                 engineCategoryInput.change();
             });
@@ -96,7 +104,8 @@
               startOffsetMsType: { value: "str" },
               endOffsetMs: { value: "", validate: RED.validators.typedInput("endOffsetMsType") },
               endOffsetMsType: { value: "str" },
-              engineCategoryId: { value: "" }
+              engineCategoryId: { value: "" },
+              engineCategoryIdType: { value: "str" },
             },
             inputs: 1,
             outputs: 2,
@@ -121,11 +130,10 @@
             },
             oneditsave: function () {
               var that = this;
-              var fields = ["tdoId", "startOffsetMs", "endOffsetMs"];
+              var fields = ["tdoId", "startOffsetMs", "endOffsetMs", "engineCategoryId"];
               $.each(fields, function (index, field) {
                   that[field + "Type"] = $("#node-input-" + field + "Type").val();
               });
-              that["engineCategoryId"] = $("#node-input-engineCategoryId").val();
             }
         });
     })();
