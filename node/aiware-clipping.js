@@ -5,8 +5,6 @@ const axios = require("axios");
 const request = require('superagent');
 const fs = require('fs');
 const os = require('os');
-const Promise = require('bluebird');
-const readFileAsync = Promise.promisify(fs.readFile);
 
 const { URL, API_TOKEN, TIMEOUT: timeout } = getConfig(process.env);
 
@@ -33,9 +31,9 @@ async function downloadFile(input, node) {
 async function createAsset(input, node) {
   try {
     const file = await downloadFile(input, node);
+    const headers = { Authorization:  `Bearer ${API_TOKEN}` };
     const fileName = file.headers['content-disposition'].split('="').pop().split('"')[0];
     await fs.writeFileSync(os.tmpdir() + '/' + fileName, file);
-    const data = await readFileAsync( os.tmpdir() + '/' + fileName );
     const query =  `mutation {
       createAsset(input: {
         containerId: "${input.tdoId}"
@@ -47,20 +45,24 @@ async function createAsset(input, node) {
         uri
       }
     }`;
-    const headers = { Authorization:  `Bearer ${API_TOKEN}` };
-    return request
-    .post(URL)
-    .set(headers)
-    .field('query', query)
-    .field('filename', fileName)
-    .attach('file', Buffer.from(data, 'utf8'), fileName)
-    .end(function gotResponse(err, response) {
-      if (!err) {
-        const responseData = JSON.parse(response.text);
-        node.log("new asset created with id "+ responseData.data.createAsset.id);
-        return responseData;
-      }
-    });
+
+    return fs.readFile(os.tmpdir() + '/' + fileName, (err, data) => {
+      if (err) node.error(log);
+      return request
+        .post(URL)
+        .set(headers)
+        .field('query', query)
+        .field('filename', fileName)
+        .attach('file', Buffer.from(data, 'utf8'), fileName)
+        .end(function gotResponse(err, response) {
+          if (!err) {
+            const responseData = JSON.parse(response.text);
+            node.log("new asset created with id "+ responseData.data.createAsset.id);
+            return responseData;
+          }
+        });
+    })
+    
   } catch (error) {
     node.log(error);
     return error;
