@@ -1,29 +1,18 @@
-const { NewVeritoneAPI } = require('../lib/graphql');
+const { getConfig } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { get } = require('lodash');
 const axios = require("axios");
 const request = require('superagent');
 const fs = require('fs');
-const path = require('path');
-const mkdirp = require('mkdirp');
+const os = require('os');
 const Promise = require('bluebird');
-
-const getDirName = require('path').dirname;
 const readFileAsync = Promise.promisify(fs.readFile);
-const mkdirpAsync = Promise.promisify(mkdirp);
 
-let VERITONE_API_BASE_URL = process.env.VERITONE_API_BASE_URL;
-if (!VERITONE_API_BASE_URL.startsWith("http")) {
-  VERITONE_API_BASE_URL = "https://" + VERITONE_API_BASE_URL;
-}
+const { URL, API_TOKEN, TIMEOUT: timeout } = getConfig(process.env);
+
 const fields = [
   "tdoId", "startOffsetMs", "endOffsetMs", "engineCategoryId"
 ];
-
-const formatRecords = (data) =>
-  (data && Array.isArray(data.records)) ?
-      data.records.sort((a, b) => a.name < b.name ? -1 : 1) :
-      [];
 
 const fieldValue = (config, field, msg) => {
   const value = config[field];
@@ -31,20 +20,26 @@ const fieldValue = (config, field, msg) => {
   return isStr ? value : get(msg, value);
 };
 
-async function getEngineCategories(api) {
-  const query = `query { engineCategories { 
-  records { id name description type { name description } totalEngines categoryType } 
-} }`;
-  const { engineCategories } = await api.Query(query);
-  return formatRecords(engineCategories);
-};
+async function downloadFile(input, node) {
+  const download_url = `${URL.replace('/v3/graphql','')}/media-streamer/download/tdo/${input.tdoId}?startOffsetMs=${input.startOffsetMs}&endOffsetMs=${input.endOffsetMs}`;
+  const headers = { "Authorization": `Bearer ${API_TOKEN}`,"Content-Type": "application/json" };
+  try {
+    return axios({ method: "GET", url: download_url, responseType: 'arraybuffer', headers, timeout});
+  } catch (error) {
+    node.log(error);
+  }
+}
 
-async function createAsset(input, node, file) {
-  return readFileAsync(file.destination).then(data => {
-    let query =  `mutation {
+async function createAsset(input, node) {
+  try {
+    const file = await downloadFile(input, node);
+    const fileName = file.headers['content-disposition'].split('="').pop().split('"')[0];
+    await fs.writeFileSync(os.tmpdir() + '/' + fileName, file);
+    const data = await readFileAsync( os.tmpdir() + '/' + fileName );
+    const query =  `mutation {
       createAsset(input: {
         containerId: "${input.tdoId}"
-        contentType: "${file.contentType}"
+        contentType: "${file.headers['content-type']}"
         details: "{ 'engineCategoryId': ${input.engineCategoryId} }"
         assetType: "media"
       }) {
@@ -52,79 +47,39 @@ async function createAsset(input, node, file) {
         uri
       }
     }`;
-
-    let headers = {
-      Authorization:  `Bearer ${process.env.API_TOKEN}`,
-    };
+    const headers = { Authorization:  `Bearer ${API_TOKEN}` };
     return request
-      .post(VERITONE_API_BASE_URL + "/v3/graphql", )
-      .set(headers)
-      .field('query', query)
-      .field('filename', file.fileName)
-      .attach('file', Buffer.from(data, 'utf8'), file.fileName)
-      .end(function gotResponse(err, response) {
-        if (!err) {
-          let responseData = JSON.parse(response.text);
-          node.log("new asset created with id "+ responseData.data.createAsset.id);
-          return responseData;
-        }
-        node.log(err);
-      });
-  });
-}
-
-async function downloadFile(input, node) {
-  const headers = {
-      "Authorization": `Bearer ${process.env.API_TOKEN}`,
-      "Content-Type": "application/json"
-  };
-  
-  const url = `${VERITONE_API_BASE_URL}/media-streamer/download/tdo/${input.tdoId}?startOffsetMs=${input.startOffsetMs}&endOffsetMs=${input.endOffsetMs}`;
-
-  axios({
-      method: "GET", url, responseType: 'arraybuffer', headers, timeout: 30000
-  }).then( res => {
-    const fileName = res.headers['content-disposition'].split('="').pop().split('"')[0];
-    const file = {
-      fileName,
-      contentType: res.headers['content-type'],
-      destination: path.join(__dirname,`../uploads/${fileName}`)
-    };
-    return mkdirpAsync(getDirName(file.destination)).then(() => {
-      fs.writeFileSync(file.destination, res);
-      createAsset(input, node, file);
+    .post(URL)
+    .set(headers)
+    .field('query', query)
+    .field('filename', fileName)
+    .attach('file', Buffer.from(data, 'utf8'), fileName)
+    .end(function gotResponse(err, response) {
+      if (!err) {
+        const responseData = JSON.parse(response.text);
+        node.log("new asset created with id "+ responseData.data.createAsset.id);
+        return responseData;
+      }
     });
-  }).catch(err => {
-    return err;
-  });
-}
-
-function registerHttpEndpoints(RED) {
-  const api = NewVeritoneAPI(RED.log.debug);
-  RED.httpAdmin.get("/veritone/engineCategories", function (req, res, next) {
-    getEngineCategories(api).then(data => res.json(data)).catch(next);
-  });
+  } catch (error) {
+    node.log(error);
+    return error;
+  }
 }
 
 function CreateNode(RED, node, config) {
-    node.on("input", function (msg) {
-      const input = {};
-      fields.forEach(field => {
-          input[field] = fieldValue(config, field, msg);
-      });
-      const { onError, onSuccess, onRequesting } = NewOutput(node, msg);
-      downloadFile(input, node)
-        .then(onRequesting)
-        .then(onSuccess)
-        .catch(onError);
+  node.on("input", function (msg) {
+    const input = {};
+    fields.forEach(field => {
+        input[field] = fieldValue(config, field, msg);
     });
-    
+    const { onError, onSuccess, onRequesting } = NewOutput(node, msg);
+    onRequesting();
+    createAsset(input, node).then(onSuccess).catch(onError);
+  });
 }
 
 module.exports = function (RED) {
-  if (RED.settings.httpNodeRoot !== false) {
-    registerHttpEndpoints(RED);
-  }
   const NodeName = 'aiware-clipping';
   RED.nodes.registerType(NodeName, function (config) {
       RED.nodes.createNode(this, config);
