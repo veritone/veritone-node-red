@@ -15,7 +15,11 @@
     "lodash": "^4.17.14",
     "multer": "^1.4.1",
     "mustache": "^2.3.0",
-    "superagent": "^4.0.0-beta.5"
+    "superagent": "^4.0.0-beta.5",
+    "fluent-ffmpeg": "^2.1.2",
+    "@ffmpeg-installer/ffmpeg": "^1.0.19",
+    "@ffprobe-installer/ffprobe": "^1.0.12",
+    "download": "^7.1.0"
   },
   "keywords": [
     "node-red",
@@ -34,7 +38,8 @@
       "engine-out": "node/engine-out.js",
       "engine-in-test": "node/engine-in-test.js",
       "aiware-objects": "node/aiware-objects.js",
-      "tensorflow-posenet": "node/tensorflow-posenet.js"
+      "tensorflow-posenet": "node/tensorflow-posenet.js",
+      "aiware-merging": "node/aiware-merging.js"
     }
   }
 }
