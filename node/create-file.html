@@ -1,146 +1,157 @@
 <script type="text/x-red" data-template-name="create-file">
-    <div class="form-row">
-        <label for="node-input-uri"><i class="fa fa-link"></i> URI </label>
-        <input type="text" id="node-input-uri" style="width:70%">
-        <input type="hidden" id="node-input-uriType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-startDateTime"><i class="fa fa-calendar"></i> Start Time (*)</label>
-        <input type="string" id="node-input-startDateTime" style="width:70%">
-        <input type="hidden" id="node-input-startDateTimeType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-stopDateTime"><i class="fa fa-calendar"></i> Stop Time</label>
-        <input type="string" id="node-input-stopDateTime" style="width:70%">
-        <input type="hidden" id="node-input-stopDateTimeType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-tdoName"> TDO Name</label>
-        <input type="string" id="node-input-tdoName" style="width:70%">
-        <input type="hidden" id="node-input-tdoNameType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-sourceId"> Source ID </label>
-        <input type="string" id="node-input-sourceId" style="width:70%">
-        <input type="hidden" id="node-input-sourceIdType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-contentType"> Content Type</label>
-        <input type="string" id="node-input-contentType" style="width:70%">
-        <input type="hidden" id="node-input-contentTypeType">
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
-        <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span>Update Stop Time From Asset</span> &nbsp;
-        &nbsp;
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-isPublic">&nbsp;</label>
-        <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
-        <span>Is Public</span> &nbsp;
-        &nbsp;
-    </div>
+  <div class="form-row">
+      <label for="node-input-uri"><i class="fa fa-link"></i> File URI </label>
+      <input type="text" id="node-input-uri" style="width:70%">
+      <input type="hidden" id="node-input-uriType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-startDateTime"><i class="fa fa-calendar"></i> Start Time (*)</label>
+      <input type="string" id="node-input-startDateTime" style="width:70%">
+      <input type="hidden" id="node-input-startDateTimeType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-stopDateTime"><i class="fa fa-calendar"></i> Stop Time</label>
+      <input type="string" id="node-input-stopDateTime" style="width:70%">
+      <input type="hidden" id="node-input-stopDateTimeType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-tdoName"> TDO Name</label>
+      <input type="string" id="node-input-tdoName" style="width:70%">
+      <input type="hidden" id="node-input-tdoNameType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-sourceId"> Source ID </label>
+      <input type="string" id="node-input-sourceId" style="width:70%">
+      <input type="hidden" id="node-input-sourceIdType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-contentType"><i class="fa fa-file"></i> Content Type</label>
+      <input type="text" id="node-input-contentType" placeholder="video/mp4">
+  </div>
+  <div class="form-row">
+      <label for="node-input-updateStopDateTimeFromAsset">&nbsp;</label>
+      <input type="checkbox" id="node-input-updateStopDateTimeFromAsset" style="display:inline-block; width:15px; vertical-align:baseline;">
+      <span>Update Stop Time From Asset</span> &nbsp;
+      &nbsp;
+  </div>
+  
+  <div class="form-row">
+      <label for="node-input-isPublic">&nbsp;</label>
+      <input type="checkbox" id="node-input-isPublic" style="display:inline-block; width:15px; vertical-align:baseline;">
+      <span>Is Public</span> &nbsp;
+      &nbsp;
+  </div>
 
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i> Node Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="icon-tag"></i> Node Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('create-file', {
-        category: 'aiWARE',
-        color: '#b3e5fc',
-        defaults: {
-            name: { value: "" },
-            tdoName: { value: "", validate: RED.validators.typedInput("tdoNameType") },
-            tdoNameType: { value: "str" },
-            sourceId: { value: "", validate: RED.validators.typedInput("sourceIdType") },
-            sourceIdType: { value: "str" },
-            contentType: { value: "", validate: RED.validators.typedInput("contentTypeType") },
-            contentTypeType: { value: "str" },
-            uri: { value: "", validate: RED.validators.typedInput("uriType") },
-            uriType: { value: "str" },
-            startDateTime: { value: "", validate: RED.validators.typedInput("startDateTimeType") },
-            startDateTimeType: { value: "str" },
-            stopDateTime: { value: "", validate: RED.validators.typedInput("stopDateTimeType") },
-            stopDateTimeType: { value: "str" },
-            isPublic: { value: false },
-            updateStopDateTimeFromAsset: { value: true }
-        },
-        inputs: 1,
-        outputs: 2,
-        outputLabels: ["result", "error"],
-        icon: "veritone-logo-transparent.png",
-        paletteLabel: "create file",
-        align: "right",
-        label: function () {
-            return this.name || this.tdoName || "create file";
-        },
-        oneditprepare: function () {
-            var that = this;
-            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
-            $.each(fields, function (index, field) {
-                $("#node-input-" + field + "Type").val(that[field + "Type"]);
-                $("#node-input-" + field).typedInput({
-                    default: 'str',
-                    typeField: $("#node-input-" + field + "Type"),
-                    types: ['str', 'msg']
-                });
-            });
-        },
-        oneditsave: function () {
-            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
-            $.each(fields, function (index, field) {
-                that[field + "Type"] = $("#node-input-" + field + "Type").val();
-            });
-        }
-    });
+  RED.nodes.registerType('create-file', {
+      category: 'aiWARE',
+      color: '#b3e5fc',
+      defaults: {
+          name: { value: "" },
+          tdoName: { value: "", validate: RED.validators.typedInput("tdoNameType") },
+          tdoNameType: { value: "str" },
+          sourceId: { value: "", validate: RED.validators.typedInput("sourceIdType") },
+          sourceIdType: { value: "str" },
+          contentType: { value: "" },
+          uri: { value: "", validate: RED.validators.typedInput("uriType") },
+          uriType: { value: "str" },
+          startDateTime: { value: "", validate: RED.validators.typedInput("startDateTimeType") },
+          startDateTimeType: { value: "str" },
+          stopDateTime: { value: "", validate: RED.validators.typedInput("stopDateTimeType") },
+          stopDateTimeType: { value: "str" },
+          isPublic: { value: false },
+          updateStopDateTimeFromAsset: { value: true }
+      },
+      inputs: 1,
+      outputs: 2,
+      outputLabels: ["result", "error"],
+      icon: "veritone-logo-transparent.png",
+      paletteLabel: "create file",
+      align: "right",
+      label: function () {
+          return this.name || this.tdoName || "create file";
+      },
+      oneditprepare: function () {
+          var that = this;
+          $("#node-input-contentType").typeahead({
+              source: [
+                  "application/octet-stream", "application/pdf",
+                  "application/pkcs12", "application/vnd.mspowerpoint",
+                  "application/xhtml+xml", "application/xml",
+                  "image/bmp", "image/gif", "image/jpeg", "image/png",
+                  "image/webp",
+                  "video/mp4", "video/ogg", "video/webm",
+                  "audio/midi", "audio/mpeg", "audio/ogg", "audio/wav",
+                  "audio/webm",
+                  "text/css", "text/html", "text/javascript", "text/plain"
+              ],
+              minLength: 0
+          });
+          var fields = ["tdoName", "sourceId", "uri", "startDateTime", "stopDateTime"];
+          $.each(fields, function (index, field) {
+              $("#node-input-" + field + "Type").val(that[field + "Type"]);
+              $("#node-input-" + field).typedInput({
+                  default: 'str',
+                  typeField: $("#node-input-" + field + "Type"),
+                  types: ['str', 'msg']
+              });
+          });
+      },
+      oneditsave: function () {
+          var fields = ["tdoName", "sourceId",  "uri", "startDateTime", "stopDateTime"];
+          $.each(fields, function (index, field) {
+              that[field + "Type"] = $("#node-input-" + field + "Type").val();
+          });
+      }
+  });
 </script>
 
 <script type="text/x-red" data-help-name="create-file">
-    <p>Creates a media file that in aiWARE is stored as a <code>TemporalDataObject</code> (also known as TDO) along with a child <code>asset</code> that is a link to the specific media file path. </p>
+  <p>Creates a media file that in aiWARE is stored as a <code>TemporalDataObject</code> (also known as TDO) along with a child <code>asset</code> that is a link to the specific media file path. </p>
 
 <h3>Inputs</h3>
 <dl class="message-properties">
-    
-    <dt>URI <span class="property-type">string</span></dt>
-    <dd>
-        The URI expects a cloud-hosted file path for downloading the file and ingesting the file into aiWARE.
-    </dd>
-    <dt>Start Time <span class="property-type">timestamp</span></dt>
-        <dd>Each <code>TemporalDataObject</code> expects a Start Time. If left blank, the Start Time will be populated with the DateTime value the TDO was created in aiWARE.
-        </dd>
-    <dt>Stop Time <span class="property-type">timestamp</span></dt>
-    <dd>
-        Similar to Start Time, Stop Time expects the actual end of the media file and is used to calculate the total file duration.
-    </dd>
-    <dt>Content Type <span class="property-type">string</span></dt>
-    <dd>
-        Content Type is optional and is used for associating a pre-defined custom schema to the media file upon creation in aiWARE. This is useful for correlating aiWARE Structured Data with Media Files.
-    </dd>
+  
+  <dt>URI <span class="property-type">string</span></dt>
+  <dd>
+      The URI expects a cloud-hosted file path for downloading the file and ingesting the file into aiWARE.
+  </dd>
+  <dt>Start Time <span class="property-type">timestamp</span></dt>
+      <dd>Each <code>TemporalDataObject</code> expects a Start Time. If left blank, the Start Time will be populated with the DateTime value the TDO was created in aiWARE.
+      </dd>
+  <dt>Stop Time <span class="property-type">timestamp</span></dt>
+  <dd>
+      Similar to Start Time, Stop Time expects the actual end of the media file and is used to calculate the total file duration.
+  </dd>
+  <dt>Content Type <span class="property-type">string</span></dt>
+  <dd>
+      Content Type is optional and is used for associating a pre-defined custom schema to the media file upon creation in aiWARE. This is useful for correlating aiWARE Structured Data with Media Files.
+  </dd>
 </dl>
 
 <h3>Outputs</h3>
 <dl class="message properties">
-    <dt>payload <span class="property-type">json</span></dt>
-    <dd>
-        The <code>msg.payload</code> will contain the TDO <code>id</code> and <code>name</code> properties along with the newly created <code>asset</code> properties of <code>id</code>, <code>assetType</code>, and the <code>signedUri</code> which is the file path that is signed for external clients to access the media file.
-    </dd>
+  <dt>payload <span class="property-type">json</span></dt>
+  <dd>
+      The <code>msg.payload</code> will contain the TDO <code>id</code> and <code>name</code> properties along with the newly created <code>asset</code> properties of <code>id</code>, <code>assetType</code>, and the <code>signedUri</code> which is the file path that is signed for external clients to access the media file.
+  </dd>
 </dl>
 
 <h3>Details</h3>
 <p>
-    The TDO serves as the “Container” of a media file and any associated important information, including templated data and various permutations of the media file.
+  The TDO serves as the “Container” of a media file and any associated important information, including templated data and various permutations of the media file.
 </p>
 
 <h3>References</h3>
 <ul>
-    <li>
-        <a href="https://docs.veritone.com/#/apis/data-model">Click here</a> to read more about the Veritone aiWARE Data Model
-   </li>
+  <li>
+      <a href="https://docs.veritone.com/#/apis/data-model">Click here</a> to read more about the Veritone aiWARE Data Model
+  </li>
 </ul>
 </script>
