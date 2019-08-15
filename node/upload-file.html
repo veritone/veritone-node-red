@@ -1,0 +1,83 @@
+<script type="text/x-red" data-template-name="upload-file">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tdoid"> TdoId </label>
+        <input type="string" id="node-input-tdoid" style="width:70%">
+        <input type="hidden" id="node-input-tdoidType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-fileName"> File Name </label>
+        <input type="string" id="node-input-fileName" style="width:70%">
+        <input type="hidden" id="node-input-fileNameType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"> Format</label>
+        <select id="node-input-format" style="width:66%">
+            <option value="mp3">Mp3</option>
+            <option value="mp4">Mp4</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="upload-file">
+<p>Media merging</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+
+</ol>
+<h3>Details</h3>
+
+<ul>
+</ul>
+</script>
+
+<script type="text/javascript">
+    (function () {
+        RED.nodes.registerType('upload-file', {
+            category: 'media',
+            color: "#b3e5fc",
+            defaults: {
+                name: { value: "upload file" },
+                format: { value: "mp3" },
+                fileName: { value: "", validate: RED.validators.typedInput("fileNameType") },
+                fileNameType: { value: "str" },
+                tdoid: { value: "", validate: RED.validators.typedInput("tdoidType") },
+                tdoidType: { value: "str" }
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "upload file",
+            label: function () {
+                return this.name || "upload file";
+            },
+            oneditprepare: function () {
+                var that = this;
+                var fields = ["fileName", "tdoid"];
+                $.each(fields, function (index, field) {
+                    $("#node-input-" + field + "Type").val(that[field + "Type"]);
+                    $("#node-input-" + field).typedInput({
+                        default: 'str',
+                        typeField: $("#node-input-" + field + "Type"),
+                        types: ['str', 'msg']
+                    });
+                });
+            },
+            oneditsave: function () {
+                var that = this;
+                var fields = ["fileName", "tdoid"];
+                $.each(fields, function (index, field) {
+                    that[field + "Type"] = $("#node-input-" + field + "Type").val();
+                });
+            }
+        });
+    })();
+</script>
