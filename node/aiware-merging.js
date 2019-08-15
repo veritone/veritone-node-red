@@ -1,19 +1,17 @@
 const { NewOutput } = require('../lib/output');
-var ffmpeg = require('fluent-ffmpeg');
-var ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-var ffprobePath = require('@ffprobe-installer/ffprobe').path;
+const { NewVeritoneAPI, GetUserAgent, VeritoneGraphqlEnv } = require('../lib/graphql');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
-var axios = require('axios');
-var superagent = require('superagent');
-var fs = require('fs');
-var download = require('download');
-var { onError, onSuccess } = {};
+const superagent = require('superagent');
+const fs = require('fs');
+const download = require('download');
 async function CreateNode(RED, node, config) {
     node.on("input", async function (msg) {
         node.status({ fill: "blue", shape: "dot", text: "processing...   " });
-        onError = NewOutput(node, msg).onError;
-        onSuccess = NewOutput(node, msg).onSuccess;
+        const { onError, onSuccess } = NewOutput(node, msg);
         var urls;
         if (msg.urls) {
             if (msg.urls.length < 2) onError(new Error("Need at least 2 urls"))
@@ -30,51 +28,34 @@ async function CreateNode(RED, node, config) {
         var outputFile = folderTmp + "output_" + time + extFile;
         var cloneFolder = folderTmp + "clone_" + time;
 
-        clone()
-        .then((files)=>{
-            merge(files, outputFile)
-            .then(async ()=>{
-                msg.filename = outputFile;
-                var createTDO = `mutation {
-                                    createTDO(input: {
-                                    startDateTime: "${new Date()}"
-                                    stopDateTime: "${new Date()}"
-                                    }) {
-                                    id
-                                    startDateTime
-                                    stopDateTime
-                                    }
-                                }`
-                var tdo = await graph(createTDO);
-                var tdoid;
-                if (tdo) tdoid = tdo['data'].data.createTDO.id;
-                await uploadFile(outputFile, tdoid, contentType);
-            })
-            .catch(err=>{
-                onError(err)
-            })
-        })
-        .catch(err=>{
+        try {
+            var files = await clone();
+            await merge(files, outputFile);
+            msg.filename = outputFile;
+            var tdoid = await createTDO();
+            var url = await uploadFile(outputFile, tdoid, contentType);
+            onSuccess(url);
+        } catch (err) {
             onError(err)
-        })
-        
+        }
+
         function clone() { // download media file to /tmp
             var count = 0;
             return new Promise((resolve, reject) => {
                 for (let i = 0; i < urls.length; i++) {
-                    download(urls[i], cloneFolder).then((data) => {
-                        if (!data) reject("Download error!")
+                    download(urls[i], cloneFolder).then(async (data) => {
+                        if (!data) reject(new Error("Download error!"))
                         else {
                             count++;
                             if (count == urls.length) {
-                                fs.readdir(cloneFolder, (err, files) => { // get list files which was downloaded
-                                    if (err) reject(err)
-                                    else {
-                                        for(let j =0; j< files.length; j++) 
-                                            files[j] = cloneFolder + '/' + files[j];
-                                        resolve(files)
-                                    }
-                                })
+                                try {
+                                    var files = await fs.readdirSync(cloneFolder);
+                                    for (let j = 0; j < files.length; j++)
+                                        files[j] = cloneFolder + '/' + files[j];
+                                    resolve(files)
+                                } catch (err) {
+                                    reject(err)
+                                }
                             }
                         }
                     })
@@ -97,83 +78,58 @@ async function CreateNode(RED, node, config) {
                         reject(err)
                     })
             })
-        }
+        } 
+        function createTDO() { // create a new TDO
+            return new Promise(async (resolve, reject)=>{
+                const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
+                const query = `mutation {
+                    createTDO(input: {
+                        startDateTime: "${new Date()}"
+                        stopDateTime: "${new Date()}"
+                    }) {
+                        id
+                        startDateTime
+                        stopDateTime
+                    }
+                }`;
 
-        async function request(options) {
-            try {
-                return await axios(options);
-            } catch (err) {
-                onError(err)
-                return null;
-            }
-        }
-        const getConfig = (obj) => {
-            const { VERITONE_API_BASE_URL, API_TOKEN, GRAPHQL_TIMEOUT } = obj;
-            let URL = VERITONE_API_BASE_URL + "/v3/graphql";
-            if (!URL.startsWith("http")) {
-                URL = "https://" + URL;
-            }
-            const TIMEOUT = +GRAPHQL_TIMEOUT || 30000;
-            return { URL, API_TOKEN, TIMEOUT };
-        };
-
-        const VeritoneGraphqlEnv = getConfig(process.env);
-        
-        async function graph(query) {
-            var options = {
-                url: VeritoneGraphqlEnv.URL,
-                method: 'POST',
-                headers: {
-                    Authorization: 'Bearer ' + VeritoneGraphqlEnv.API_TOKEN
-                },
-                data: {
-                    query: query
+                try {
+                    const { createTDO: response } = await api.Query(query);
+                    var tdoid = response.id;
+                    resolve(tdoid);
+                } catch (error) {
+                    reject(error);
                 }
-            }
-            return await request(options);
+            });
         }
-        
-        async function uploadFile(filePath, tdoId, contentType) { // upload outputfile to an asset (with new tdo)
-            var query = `mutation {
-                createAsset(input: {
-                   containerId: "${tdoId}"
-                   contentType: "${contentType}"
-                   assetType: "media"
-                 }) {
-                   id
-                   uri
-                   signedUri
-                 }
-              }
-               `;
-            try {
-                await superagent
-                    .post(VeritoneGraphqlEnv.URL)
-                    .set({ Authorization: `Bearer ${VeritoneGraphqlEnv.API_TOKEN}` })
-                    .field('query', query)
-                    .field('filename', filePath)
-                    .attach('file', filePath)
-                    .end(function gotResponse(err, response) {
-                        if (!err) {
-                            let responseData = JSON.parse(response.text);
-                            let url = responseData.data.createAsset.signedUri;
-                            fs.unlink(filePath, (err) => {
-                                if (err) {
-                                    onError(err);
-                                    throw err;
-                                }
-                            });
-                            onSuccess(url);
-                            return url;
-                        } else {
-                            onError(err)
-                            return null
-                        }
-                    });
-            } catch (err) {
-                onError(err)
-                return null;
-            }
+
+        function uploadFile(filePath, tdoId, contentType) { // upload outputfile to an asset (with new tdo)
+            return new Promise(async (resolve, reject)=>{
+                var query = `mutation {
+                    createAsset(input: {
+                       containerId: "${tdoId}"
+                       contentType: "${contentType}"
+                       assetType: "media"
+                    }) {
+                       id
+                       uri
+                       signedUri
+                    }
+                }`;
+                try {
+                    var response = await superagent
+                                        .post(VeritoneGraphqlEnv.URL)
+                                        .set({ Authorization: `Bearer ${VeritoneGraphqlEnv.API_TOKEN}` })
+                                        .field('query', query)
+                                        .field('filename', filePath)
+                                        .attach('file', filePath)
+                    var responseData = JSON.parse(response.text).data
+                    var url = responseData.createAsset.signedUri;
+                    resolve(url);
+                } catch (err) {
+                    reject(err);
+                }
+            });
         }
     });
 }
