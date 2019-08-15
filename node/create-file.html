@@ -1,6 +1,6 @@
 <script type="text/x-red" data-template-name="create-file">
     <div class="form-row">
-        <label for="node-input-uri"><i class="fa fa-link"></i> URI </label>
+        <label for="node-input-uri"><i class="fa fa-link"></i> File URI </label>
         <input type="text" id="node-input-uri" style="width:70%">
         <input type="hidden" id="node-input-uriType">
     </div>
@@ -60,8 +60,7 @@
             tdoNameType: { value: "str" },
             sourceId: { value: "", validate: RED.validators.typedInput("sourceIdType") },
             sourceIdType: { value: "str" },
-            contentType: { value: "", validate: RED.validators.typedInput("contentTypeType") },
-            contentTypeType: { value: "str" },
+            contentType: { value: "" },
             uri: { value: "", validate: RED.validators.typedInput("uriType") },
             uriType: { value: "str" },
             startDateTime: { value: "", validate: RED.validators.typedInput("startDateTimeType") },
@@ -82,7 +81,21 @@
         },
         oneditprepare: function () {
             var that = this;
-            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
+            var fields = ["tdoName", "sourceId", "uri", "startDateTime", "stopDateTime"];
+            $("#node-input-contentType").typeahead({
+                source: [
+                    "application/octet-stream", "application/pdf",
+                    "application/pkcs12", "application/vnd.mspowerpoint",
+                    "application/xhtml+xml", "application/xml",
+                    "image/bmp", "image/gif", "image/jpeg", "image/png",
+                    "image/webp",
+                    "video/mp4", "video/ogg", "video/webm",
+                    "audio/midi", "audio/mpeg", "audio/ogg", "audio/wav",
+                    "audio/webm",
+                    "text/css", "text/html", "text/javascript", "text/plain"
+                ],
+                minLength: 0
+            });
             $.each(fields, function (index, field) {
                 $("#node-input-" + field + "Type").val(that[field + "Type"]);
                 $("#node-input-" + field).typedInput({
@@ -93,7 +106,7 @@
             });
         },
         oneditsave: function () {
-            var fields = ["tdoName", "sourceId", "contentType", "uri", "startDateTime", "stopDateTime"];
+            var fields = ["tdoName", "sourceId", "uri", "startDateTime", "stopDateTime"];
             $.each(fields, function (index, field) {
                 that[field + "Type"] = $("#node-input-" + field + "Type").val();
             });
@@ -141,6 +154,6 @@
 <ul>
     <li>
         <a href="https://docs.veritone.com/#/apis/data-model">Click here</a> to read more about the Veritone aiWARE Data Model
-   </li>
+  </li>
 </ul>
 </script>
