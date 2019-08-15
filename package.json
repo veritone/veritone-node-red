@@ -39,7 +39,7 @@
       "engine-in-test": "node/engine-in-test.js",
       "aiware-objects": "node/aiware-objects.js",
       "tensorflow-posenet": "node/tensorflow-posenet.js",
-      "aiware-merging": "node/aiware-merging.js"
+      "media-merging": "node/media-merging.js"
     }
   }
 }

@@ -1,4 +1,4 @@
-<script type="text/x-red" data-template-name="aiware-merging">
+<script type="text/x-red" data-template-name="media-merging">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -22,7 +22,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="aiware-merging">
+<script type="text/x-red" data-help-name="media-merging">
 <p>Media merging</p>
 <h3>Inputs</h3>
 <dl class="message-properties">
@@ -40,11 +40,11 @@
 
 <script type="text/javascript">
     (function () {
-        RED.nodes.registerType('aiware-merging', {
-            category: 'aiWARE',
+        RED.nodes.registerType('media-merging', {
+            category: 'media',
             color: "#b3e5fc",
             defaults: {
-                name: { value: "merging media file" },
+                name: { value: "media merging" },
                 format: { value: "mp3" },
                 url1: { value: "", validate: RED.validators.typedInput("url1Type") },
                 url1Type: { value: "str" },
@@ -55,9 +55,9 @@
             outputs: 2,
             outputLabels: ["result", "error"],
             icon: "veritone-logo-transparent.png",
-            paletteLabel: "aiware merging",
+            paletteLabel: "media merging",
             label: function () {
-                return this.name || "aiware merging";
+                return this.name || "media merging";
             },
             oneditprepare: function () {
                 var that = this;
