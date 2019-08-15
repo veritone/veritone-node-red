@@ -1,7 +1,7 @@
 const { NewOutput } = require('../lib/output');
-var pg = require('pg');
-var Client = require('ssh2').Client;
-var net = require('net');
+const pg = require('pg');
+const Client = require('ssh2').Client;
+const net = require('net');
 
 
 function CreateNode(RED, node, config) {
@@ -23,17 +23,17 @@ module.exports = function(RED) {
 }
 
 function sshConnect(pramData) {
-    var ssh = new Client();
-    var srv, sourcePort = 12345;
+    const ssh = new Client();
+    var srv;
 
     return new Promise(function(resolve, reject){
         ssh.on('ready', function() {
-            srv = net.createServer(function(sock) {
+            srv = net.createServer( (sock) => {
                 ssh.forwardOut(
                     // source address, this can usually be any valid address
                     'localhost',
                     // source port, this can be any valid port number
-                    sourcePort,
+                    0,
                     // destination address (localhost here refers to the SSH server)
                     'localhost',
                     // destination port
@@ -51,7 +51,9 @@ function sshConnect(pramData) {
                 );
             });
             
-            srv.listen(sourcePort, function() {
+            srv.listen(0, function() {
+                const sourcePort = srv.address().port;
+                
                 const client = new pg.Client({
                     user: pramData.dbUsername,
                     host: 'localhost',
@@ -74,6 +76,9 @@ function sshConnect(pramData) {
                         resolve(result);
                     });
                 });
+            }).on('error', (err) => {
+                ssh.end();
+                reject(err);
             });
 
         })
@@ -91,8 +96,4 @@ function sshConnect(pramData) {
             password: pramData.sshPassword 
         });
     });
-}
-
-function sshClose() {
-    ssh.end();
 }
