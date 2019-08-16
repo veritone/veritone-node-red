@@ -2,9 +2,11 @@ const { getConfig } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const { get } = require('lodash');
 const axios = require("axios");
-const request = require('superagent');
+const { promisify } = require('util');
+const FormData = require('form-data');
 const fs = require('fs');
 const os = require('os');
+const readFile = promisify(fs.readFile);
 
 const { URL, API_TOKEN, TIMEOUT: timeout } = getConfig(process.env);
 
@@ -29,44 +31,39 @@ async function downloadFile(input, node) {
 }
 
 async function createAsset(input, node) {
-  try {
-    const file = await downloadFile(input, node);
-    const headers = { Authorization:  `Bearer ${API_TOKEN}` };
-    const fileName = file.headers['content-disposition'].split('="').pop().split('"')[0];
-    await fs.writeFileSync(os.tmpdir() + '/' + fileName, file);
-    const query =  `mutation {
-      createAsset(input: {
-        containerId: "${input.tdoId}"
-        contentType: "${file.headers['content-type']}"
-        details: "{ 'engineCategoryId': ${input.engineCategoryId} }"
-        assetType: "media"
-      }) {
-        id
-        uri
-      }
-    }`;
-
-    return fs.readFile(os.tmpdir() + '/' + fileName, (err, data) => {
-      if (err) node.error(log);
-      return request
-        .post(URL)
-        .set(headers)
-        .field('query', query)
-        .field('filename', fileName)
-        .attach('file', Buffer.from(data, 'utf8'), fileName)
-        .end(function gotResponse(err, response) {
-          if (!err) {
-            const responseData = JSON.parse(response.text);
-            node.log("new asset created with id "+ responseData.data.createAsset.id);
-            return responseData;
-          }
-        });
-    })
-    
-  } catch (error) {
-    node.log(error);
-    return error;
-  }
+  const formData = new FormData();
+  const file = await downloadFile(input, node);
+  const headers = { 
+    Authorization:  `Bearer ${API_TOKEN}`,
+    ...formData.getHeaders()
+  };
+  const time = (new Date()).getTime();
+  const ext = file.headers['content-disposition'].split('="').pop().split('"')[0].split('.').pop();
+  const fileName = time + "." + ext;
+  await fs.writeFileSync(os.tmpdir() + '/' + fileName, file);
+  const query =  `mutation {
+    createAsset(input: {
+      containerId: "${input.tdoId}"
+      contentType: "${file.headers['content-type']}"
+      details: "{ 'engineCategoryId': ${input.engineCategoryId} }"
+      assetType: "media"
+    }) {
+      id
+      uri
+      signedUri
+    }
+  }`;
+  
+  const buffer = await readFile(os.tmpdir() + '/' + fileName);
+  formData.append('query', query);
+  formData.append('file', buffer, { filename: fileName }); 
+  const r = await axios({
+    method: 'POST',
+    url: URL,
+    data: formData,
+    headers
+  });
+  return r.data;
 }
 
 function CreateNode(RED, node, config) {
