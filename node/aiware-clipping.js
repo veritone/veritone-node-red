@@ -72,8 +72,8 @@ function CreateNode(RED, node, config) {
     fields.forEach(field => {
         input[field] = fieldValue(config, field, msg);
     });
-    const { onError, onSuccess, onRequesting } = NewOutput(node, msg);
-    onRequesting();
+    const { onError, onSuccess } = NewOutput(node, msg);
+    node.status({ fill: "blue", shape: "dot", text: "processing...   " });
     createAsset(input, node).then(onSuccess).catch(onError);
   });
 }

@@ -179,6 +179,88 @@ async function updateCollection(api, params) {
     return res;
 }
 
+async function readFolder(api, params, props) {
+    const types = {
+        id: 'ID!',
+    };
+    const { argStr, holderStr } = makeArgHolder(types, params);
+    const query = `query ${argStr} { 
+        folder ${holderStr} { 
+            ${makePropList(props)}
+        } 
+    }`;
+    const variables = params;
+    const { folder } = await api.Query(query, variables);
+    return folder;
+}
+
+async function updateFolder(api, params) {
+    const query = `mutation ($input: UpdateFolder!) { 
+        updateFolder(input: $input) {
+            id
+            name
+        }
+    }`;
+    const input = params;
+    const { updateFolder } = await api.Query(query, { input });
+    return updateFolder;
+}
+
+async function readLibrary(api, params, props) {
+  const types = {
+      id: 'ID',
+      name: 'String',
+      type: 'String',
+      entityIdentifierTypeIds: '[String]',
+      includeOwnedOnly: 'Boolean',
+      orderBy: 'WatchlistOrderBy = createdDateTime',
+      orderDirection: 'OrderDirection = desc',
+      offset: 'Int = 0',
+      limit: 'Int = 30'
+  };
+  const { argStr, holderStr } = makeArgHolder(types, params);
+  const query = `query ${argStr} { 
+      libraries ${holderStr} { 
+          records { ${makePropList(props)} } 
+      } 
+  }`;
+  const variables = params;
+  const { libraries: res } = await api.Query(query, variables);
+  return getRecords(res);
+}
+
+async function createLibrary(api, params) {
+  const query = `mutation ($input: CreateLibrary!) { 
+      createLibrary(input: $input) {
+          id
+      }
+  }`;
+  const input = params;
+  const { createLibrary: res } = await api.Query(query, { input });
+  return res;
+}
+
+async function deleteLibrary(api, { id }) {
+  const query = `mutation ($id: ID!) { 
+      deleteLibrary(id: $id) {
+          id
+      }
+  }`;
+  const { deleteLibrary: res } = await api.Query(query, { id });
+  return res;
+};
+
+async function updateLibrary(api, params) {
+  const query = `mutation ($input: UpdateLibrary!) { 
+      updateLibrary(input: $input) {
+          id
+      }
+  }`;
+  const input = params;
+  const { updateLibrary: res } = await api.Query(query, { input });
+  return res;
+}
+
 const workers = {
     'watchlist.create': createWatchlist,
     'watchlist.update': updateWatchlist,
@@ -189,6 +271,14 @@ const workers = {
     'collection.update': updateCollection,
     'collection.delete': deleteCollection,
     'collection.read': readCollection,
+
+    'folder.read' : readFolder,
+    'folder.update' : updateFolder,
+
+    'library.create': createLibrary,
+    'library.update': updateLibrary,
+    'library.delete': deleteLibrary,
+    'library.read': readLibrary,
 };
 
 function CreateNode(RED, node, config) {

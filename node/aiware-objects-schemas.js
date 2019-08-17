@@ -103,10 +103,92 @@ const Schemas = {
             { field: 'typeId' },
             { field: 'isActive' }
         ]
-    }
+    },
+    'folder.read' : {
+        title: 'Read Folder',
+        params: [
+            { field: 'id', required: true},
+        ],
+        props: [
+            { field: 'id' },
+            { field: 'name' },
+            { field: 'description' },
+        ]
+    },
+    'folder.update' : {
+        title: 'Update Folder',
+        params: [
+            { field: 'id', required: true},
+            { field: 'name', required: true}
+        ]
+    },
+    'library.create': {
+        title: 'Create a library',
+        params: [
+            { field: 'name', required: true },
+            { field: 'applicationId' },
+            { field: 'organizationId' },
+            { field: 'applicationId' },
+            { field: 'libraryTypeId' },
+            { field: 'coverImageUrl' },
+            { field: 'description' }
+        ]
+    },
+    'library.update': {
+        title: 'Update a library',
+        params: [
+            { field: 'id', required: true },
+            { field: 'name' },
+            { field: 'coverImageUrl' },
+            { field: 'description' },
+            { field: 'libraryTypeId' },
+            { field: 'version' }
+        ]
+    },
+    'library.delete': {
+        title: 'Delete a library',
+        params: [
+            { field: 'id' }
+        ]
+    },
+    'library.read': {
+      title: 'Read Library',
+      params: [
+          { field: 'id' },
+          { field: 'name' },
+          { field: 'type' },
+          { field: 'entityIdentifierTypeIds' },
+          { field: 'includeOwnedOnly' },
+          { field: 'orderBy' },
+          { field: 'orderDirection' },
+          { field: 'offset', type: 'number' },
+          { field: 'limit', type: 'number' },
+      ],
+      props: [
+          { field: 'id', required: true },
+          { field: 'name' },
+          { field: 'description' },
+          { field: 'properties' },
+          { field: 'organizationId' },
+          { field: 'applicationId' },
+          { field: 'libraryTypeId' },
+          { field: 'libraryType' },
+          { field: 'coverImageUrl' },
+          { field: 'engineModels' },
+          { field: 'configurations' },
+          { field: 'dataset' },
+          { field: 'entities' },
+          { field: 'collaborators' },
+          { field: 'summary' },
+          { field: 'version' },
+          { field: 'security' },
+          { field: 'createdDateTime' },
+          { field: 'createdBy' },
+          { field: 'modifiedDateTime' },
+          { field: 'modifiedBy' }
+      ]
+  },
 }
-
-
 
 
 module.exports = {

@@ -1,0 +1,100 @@
+<script type="text/javascript">
+    RED.nodes.registerType('postgres-remote',{
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: {value:""},
+            dbQuery: { value: "" },
+            sshHostname: { value: "" },
+            sshPort: { value: "22" },
+            sshUsername: { value: "" },
+            sshPassword: { value: "" },
+            dbHostname: { value: "127.0.0.1" },
+            dbServerPort: { value: "5432" },
+            dbUsername: { value: "" },
+            dbPassword: { value: "" },
+            dbSchema: { value: "" },
+
+        },
+        inputs: 1,
+        outputs: 2,
+        outputLabels: ["result", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "postgres remote",
+        label: function() {
+            return this.name || "postgres remote";
+        },
+        oneditprepare: function () {
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-dbQuery-editor',
+                mode: 'ace/mode/sql',
+                value: $("#node-input-dbQuery").val()
+            });
+        },
+        oneditsave: function () {
+            $("#node-input-dbQuery").val(this.editor.getValue())
+            // delete this.editor;
+        },
+    });
+</script>
+
+<script type="text/x-red" data-template-name="postgres-remote">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label style="width:50%" for="node-input-dbQuery"><i class="fa fa-object-group"></i> Query</label>
+        <input type="hidden" id="node-input-dbQuery" autofocus="focus">
+    </div>
+    
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px;" class="node-text-editor" id="node-input-dbQuery-editor" ></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sshHostname">SSH Hostname</label>
+        <input type="text" id="node-input-sshHostname" placeholder="SSH Hostname">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sshPort">SSH Port</label>
+        <input type="text" id="node-input-sshPort"> 
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sshUsername">SSH Username</label>
+        <input type="text" id="node-input-sshUsername" placeholder="SSH Username">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-sshPassword">SSH Password</label>
+        <input type="password" id="node-input-sshPassword" placeholder="SSH Password">
+    </div>
+    <hr/>
+    <div class="form-row">
+        <label for="node-input-dbHostname">Postgres Hostname</label>
+        <input type="text" id="node-input-dbHostname">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dbServerPort">Postgres Server Port</label>
+        <input type="text" id="node-input-dbServerPort">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dbUsername">Username</label>
+        <input type="text" id="node-input-dbUsername">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dbPassword">Password</label>
+        <input type="password" id="node-input-dbPassword">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dbSchema">Schema</label>
+        <input type="text" id="node-input-dbSchema">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="postgres-remote">
+    <p>Executes the query specified in msg.payload or node's query property</p>
+</script>

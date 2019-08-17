@@ -8,6 +8,8 @@
         <select id="node-input-object" style="width:66%">
             <option value="watchlist">Watchlist</option>
             <option value="collection">Collection</option>
+            <option value="folder">Folder</option>
+            <option value="library">Library</option>
         </select>
     </div>
     <div class="form-row">
@@ -25,44 +27,44 @@
 
 <script type="text/x-red" data-help-name="aiware-objects">
     <p>
-    Easily create, query, delete, or update standard aiWARE objects including <code>Collections</code> and <code>Watchlists</code>
-</p>
-<h3>Inputs</h3>
-<dl class="message-properties">
-    <dt>
-        Object <span class="property-type">dropdown</span>
-    </dt>
-    <dd>
-        Dropdown selection of the aiWARE object intended for a specific operation to be performed on
-    </dd>
-    <dt>
-        Action <span class="property-type">dropdown</span>
-    </dt>
-    <dd>
-        Dropdown selection of the action to perform on the aiWARE object. Choices include Create, Read, Update, or Delete
-    </dd>
-    <dt>
-        Filter <span class="property-type">string</span>
-    </dt>
-    <dd>
-        When the aiWARE object and intended action have been selected, the Filters become available to narrow down the aiWARE objects for the operation to be performed on
-    </dd>
-</dl>
-<h3>Outputs</h3>
-<ol class="node-ports">
-     <li>
-        <dl class="message-properties">
-            <dt>payload <span class="property-type">json</span></dt>
-             <dd>Output JSON that contains the details of the aiWARE object that was selected from the dropdown along with the selected fields from that aiWARE object
-         </dl>
-     </li>
-</ol>
-<h3>Details</h3>
-<ul>
-    <li>
-        <a href="https://docs.veritone.com/#/apis/data-model">aiWARE API Data Model</a> - Reference for how aiWARE Objects relate to each other in the API Data Model
-    </li>
-</ul>
+        Easily create, query, delete, or update standard aiWARE objects including <code>Collections</code> and <code>Watchlists</code>
+    </p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>
+            Object <span class="property-type">dropdown</span>
+        </dt>
+        <dd>
+            Dropdown selection of the aiWARE object intended for a specific operation to be performed on
+        </dd>
+        <dt>
+            Action <span class="property-type">dropdown</span>
+        </dt>
+        <dd>
+            Dropdown selection of the action to perform on the aiWARE object. Choices include Create, Read, Update, or Delete
+        </dd>
+        <dt>
+            Filter <span class="property-type">string</span>
+        </dt>
+        <dd>
+            When the aiWARE object and intended action have been selected, the Filters become available to narrow down the aiWARE objects for the operation to be performed on
+        </dd>
+    </dl>
+    <h3>Outputs</h3>
+    <ol class="node-ports">
+         <li>
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">json</span></dt>
+                 <dd>Output JSON that contains the details of the aiWARE object that was selected from the dropdown along with the selected fields from that aiWARE object
+             </dl>
+         </li>
+    </ol>
+    <h3>Details</h3>
+    <ul>
+        <li>
+            <a href="https://docs.veritone.com/#/apis/data-model">aiWARE API Data Model</a> - Reference for how aiWARE Objects relate to each other in the API Data Model
+        </li>
+    </ul>
 </script>
 
 <script type="text/javascript">
@@ -76,6 +78,10 @@
         const loading = (text) => $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
         const definitions = {};
         const getDefinitions = (key) => new Promise((resolve, reject) => {
+            if (!key) {
+                resolve([]);
+                return;
+            }
             if (definitions[key]) {
                 resolve(definitions[key]);
                 return;
@@ -86,7 +92,7 @@
             }).fail((e) => reject(e.responseJSON.message));
         });
 
-        const crudKey = (object, action) => `${object}.${action}`;
+        const crudKey = (object, action) => (object && action) ? `${object}.${action}` : '';
         const crudDataNode = () => $("#input-for-crud-data");
         const getCrudData = (key) => crudDataNode().data(key);
         const setCrudData = (key, data) => crudDataNode().data(key, data);
@@ -160,6 +166,7 @@
         }
 
         const renderForm = (actionData, key) => {
+            if (!key) { return; }
             actionData[key] = actionData[key] || {params: {}, props: {}};
             const data = actionData[key];
             setCrudData(key, data);
@@ -203,9 +210,8 @@
                 const { object, action } = this;
                 this.actionData = this.actionData || {};
                 // set data into node
-                const key = crudKey(object, action);
                 onCrudKeyChange((key) => renderForm(this.actionData, key));
-                renderForm(this.actionData, key);
+                renderForm(this.actionData, crudKey(object, action));
                 crudDataNode().on('change', () => {
                     this.mtime = Date.now();
                 });
@@ -213,7 +219,9 @@
             oneditsave: function () {
                 const { object, action } = this;
                 const key = crudKey(object, action);
-                this.actionData[key] = getCrudData(key);
+                if (key) {
+                    this.actionData[key] = getCrudData(key);
+                }
             }
         });
     })();
