@@ -1,0 +1,90 @@
+<script type="text/x-red" data-template-name="media-merging">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"> Output Format</label>
+        <select id="node-input-format" style="width:66%">
+            <option value="mp3">Mp3</option>
+            <option value="mp4">Mp4</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-url1"> Url1 </label>
+        <input type="string" id="node-input-url1" style="width:70%">
+        <input type="hidden" id="node-input-url1Type">
+    </div>
+    <div class="form-row">
+        <label for="node-input-url2"> Url2 </label>
+        <input type="string" id="node-input-url2" style="width:70%">
+        <input type="hidden" id="node-input-url2Type">
+    </div>
+    <div class="form-row">
+        <label for="node-input-tdoId"> TdoId </label>
+        <input type="string" id="node-input-tdoId" style="width:70%">
+        <input type="hidden" id="node-input-tdoIdType">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="media-merging">
+<p>Media merging</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+
+</ol>
+<h3>Details</h3>
+
+<ul>
+</ul>
+</script>
+
+<script type="text/javascript">
+    (function () {
+        RED.nodes.registerType('media-merging', {
+            category: 'media',
+            color: "#b3e5fc",
+            defaults: {
+                name: { value: "media merging" },
+                format: { value: "mp3" },
+                url1: { value: "", validate: RED.validators.typedInput("url1Type") },
+                url1Type: { value: "str" },
+                url2: { value: "", validate: RED.validators.typedInput("url2Type") },
+                url2Type: { value: "str" },
+                tdoId: { value: "", validate: RED.validators.typedInput("tdoIdType") },
+                tdoIdType: { value: "str" }
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "media merging",
+            label: function () {
+                return this.name || "media merging";
+            },
+            oneditprepare: function () {
+                var that = this;
+                var fields = ["url1", "url2", "tdoId"];
+                $.each(fields, function (index, field) {
+                    $("#node-input-" + field + "Type").val(that[field + "Type"]);
+                    $("#node-input-" + field).typedInput({
+                        default: 'str',
+                        typeField: $("#node-input-" + field + "Type"),
+                        types: ['str', 'msg']
+                    });
+                });
+            },
+            oneditsave: function () {
+                var that = this;
+                var fields = ["url1", "url2", "tdoId"];
+                $.each(fields, function (index, field) {
+                    that[field + "Type"] = $("#node-input-" + field + "Type").val();
+                });
+            }
+        });
+    })();
+</script>

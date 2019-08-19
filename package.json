@@ -16,7 +16,10 @@
     "multer": "^1.4.1",
     "mustache": "^2.3.0",
     "pg": "^7.12.1",
-    "ssh2": "^0.8.5"
+    "ssh2": "^0.8.5",
+    "fluent-ffmpeg": "^2.1.2",
+    "@ffmpeg-installer/ffmpeg": "^1.0.19",
+    "@ffprobe-installer/ffprobe": "^1.0.12"
   },
   "keywords": [
     "node-red",
@@ -36,7 +39,8 @@
       "engine-in-test": "node/engine-in-test.js",
       "aiware-objects": "node/aiware-objects.js",
       "tensorflow-posenet": "node/tensorflow-posenet.js",
-      "postgres-remote": "node/postgres-remote.js"
+      "postgres-remote": "node/postgres-remote.js",
+      "media-merging": "node/media-merging.js"
     }
   }
 }
