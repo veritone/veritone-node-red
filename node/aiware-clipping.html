@@ -64,7 +64,7 @@
         }
 
         function newSelectNode(data, title) {
-            var node = $("<select id='node-input-engineCategoryId'></select>");
+            var node = $("<select id='node-input-engineCategoryId' multiple style='height: 150px; width: 71%'></select>");
             node.append(
                 $("<option disabled value=''> -- " + title + " -- </option>")
                   .attr("selected", "selected")
