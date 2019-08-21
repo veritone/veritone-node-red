@@ -11,16 +11,6 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-url1"> Url1 </label>
-        <input type="string" id="node-input-url1" style="width:70%">
-        <input type="hidden" id="node-input-url1Type">
-    </div>
-    <div class="form-row">
-        <label for="node-input-url2"> Url2 </label>
-        <input type="string" id="node-input-url2" style="width:70%">
-        <input type="hidden" id="node-input-url2Type">
-    </div>
-    <div class="form-row">
         <label for="node-input-tdoId"> TdoId </label>
         <input type="string" id="node-input-tdoId" style="width:70%">
         <input type="hidden" id="node-input-tdoIdType">
@@ -31,7 +21,8 @@
 <p>Media merging</p>
 <h3>Inputs</h3>
 <dl class="message-properties">
-    
+    Additional urls can be specified by setting <code>msg.urls</code> as an array
+    Eg: ["url1", "url2", "url3"]
 </dl>
 <h3>Outputs</h3>
 <ol class="node-ports">
@@ -51,10 +42,6 @@
             defaults: {
                 name: { value: "media merging" },
                 format: { value: "mp3" },
-                url1: { value: "", validate: RED.validators.typedInput("url1Type") },
-                url1Type: { value: "str" },
-                url2: { value: "", validate: RED.validators.typedInput("url2Type") },
-                url2Type: { value: "str" },
                 tdoId: { value: "", validate: RED.validators.typedInput("tdoIdType") },
                 tdoIdType: { value: "str" }
             },
@@ -68,7 +55,7 @@
             },
             oneditprepare: function () {
                 var that = this;
-                var fields = ["url1", "url2", "tdoId"];
+                var fields = ["tdoId"];
                 $.each(fields, function (index, field) {
                     $("#node-input-" + field + "Type").val(that[field + "Type"]);
                     $("#node-input-" + field).typedInput({
@@ -80,7 +67,7 @@
             },
             oneditsave: function () {
                 var that = this;
-                var fields = ["url1", "url2", "tdoId"];
+                var fields = ["tdoId"];
                 $.each(fields, function (index, field) {
                     that[field + "Type"] = $("#node-input-" + field + "Type").val();
                 });

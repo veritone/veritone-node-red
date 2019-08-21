@@ -6,6 +6,16 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 const fs = require('fs');
+const { get } = require('lodash');
+const fields = [
+    "tdoId", "url1", "url2"
+];
+
+const fieldValue = (config, field, msg) => {
+    const value = config[field];
+    const isStr = config[`${field}Type`] === 'str';
+    return isStr ? value : get(msg, value);
+};
 async function CreateNode(RED, node, config) {
     node.on("input", async function (msg) {
         node.status({ fill: "blue", shape: "dot", text: "processing...   " });
@@ -18,13 +28,14 @@ async function CreateNode(RED, node, config) {
         const outputFile = folderTmp + "output_" + time + extFile;
         const downloads = [];
         var urls;
-        
-        if (msg.urls) {
-            if (msg.urls.length < 2) onError(new Error("Need at least 2 urls"))
-            else urls = msg.urls;
-        } else {
-            if (!config.url1 || !config.url2) onError(new Error("Need at least 2 urls"))
-            else urls = [config.url1, config.url2]
+        fields.forEach(field => {
+            config[field] = fieldValue(config, field, msg);
+        });
+        if (!msg.urls || (msg.urls && msg.urls.length<2)) {
+            return onError(new Error("Need at least 2 urls"))
+        }
+        else {
+            urls = msg.urls;
         }
         try {
             await download();
@@ -66,8 +77,8 @@ async function CreateNode(RED, node, config) {
         }
 
         async function createTDO() {
-            const tdoId = msg.tdoId || config.tdoId;
-            if(tdoId) return tdoId;
+            const tdoId = config.tdoId; // if tdoId is be specified by setting config.tdoId, will not create a new tdo
+            if (tdoId) return tdoId;
             const query = `mutation {
                 createTDO(input: {
                     startDateTime: "${new Date()}"
@@ -78,7 +89,7 @@ async function CreateNode(RED, node, config) {
                     stopDateTime
                 }
             }`;
-            const {createTDO} = await api.Query(query);
+            const { createTDO } = await api.Query(query);
             return createTDO.id;
         }
     });
