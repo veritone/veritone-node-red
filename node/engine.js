@@ -36,7 +36,7 @@ async function getLibraries(api) {
 async function createJob(api, targetId, tasks) {
     const command = 'createJob';
     const input = { targetId, tasks };
-    const fields = `id name status tasks { records {id name status} }`;
+    const fields = `id name status tasks { records {id name status engine { id name }} }`;
     const { createJob: res } = await api.Mutate(command, input, fields);
     return res;
 }
