@@ -14,12 +14,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-action"><i class="icon-tag"></i> Action</label>
-        <select id="node-input-action" style="width:66%">
-            <option value="create">Create</option>
-            <option value="read">Read</option>
-            <option value="update">Update</option>
-            <option value="delete">Delete</option>
-        </select>
+        <select id="node-input-action" style="width:66%"></select>
     </div>
     <input type="hidden" id="node-input-mtime">
     <div id="input-for-crud-data"></div>
@@ -69,6 +64,7 @@
 
 <script type="text/javascript">
     (function () {
+        const actionOptions = ['Create', 'Read', 'Update', 'Delete'];
         const inputTypes = {
             "string": "text",
             "number": "number",
@@ -77,6 +73,23 @@
         };
         const loading = (text) => $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
         const definitions = {};
+        
+        const checkOptions = (object) => {
+          const action =  $('#node-input-action');
+          action.empty();
+          actionOptions.forEach(option => {
+            const key = crudKey(object, option);
+            getDefinitions(key).then(schema => {
+              const { params } = schema || {};
+                if (Array.isArray(params)) {
+                  action.append("<option value='" + option.toLowerCase() +"'>" + option + "</option>");
+                }
+            }).catch(e => {
+              console.log(`Can not get schema with key = ${key}`);
+            });
+          });
+        }
+
         const getDefinitions = (key) => new Promise((resolve, reject) => {
             if (!key) {
                 resolve([]);
@@ -89,10 +102,10 @@
             $.getJSON("/veritone/objects/schemas/" + key, function (data) {
                 if (data) { definitions[key] = data; }
                 resolve(data);
-            }).fail((e) => reject(e.responseJSON.message));
+            }).fail((e) => reject(e));
         });
 
-        const crudKey = (object, action) => (object && action) ? `${object}.${action}` : '';
+        const crudKey = (object, action) => (object && action) ? `${object}.${action.toLowerCase()}` : '';
         const crudDataNode = () => $("#input-for-crud-data");
         const getCrudData = (key) => crudDataNode().data(key);
         const setCrudData = (key, data) => crudDataNode().data(key, data);
@@ -208,6 +221,8 @@
             },
             oneditprepare: function () {
                 const { object, action } = this;
+                const objectElement = $("#node-input-object");
+                objectElement.on('change', () => checkOptions(objectElement.val()));
                 this.actionData = this.actionData || {};
                 // set data into node
                 onCrudKeyChange((key) => renderForm(this.actionData, key));
