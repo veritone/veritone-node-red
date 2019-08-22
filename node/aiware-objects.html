@@ -79,16 +79,12 @@
           action.empty();
           actionOptions.forEach(option => {
             const key = `${object}.${option.toLowerCase()}`;
-            if (definitions[key]) {
-              action.append("<option value='" + option.toLowerCase() +"'>" + option + "</option>");
-            }else {
-              $.getJSON("/veritone/objects/schemas/" + key, function (data) {
-                if(data) {
-                  definitions[key] = data;
+            getDefinitions(key).then(schema => {
+              const { params } = schema || {};
+                if (Array.isArray(params)) {
                   action.append("<option value='" + option.toLowerCase() +"'>" + option + "</option>");
                 }
-              });
-            }
+            });
           });
         }
 
@@ -104,7 +100,7 @@
             $.getJSON("/veritone/objects/schemas/" + key, function (data) {
                 if (data) { definitions[key] = data; }
                 resolve(data);
-            }).fail((e) => reject(e.responseJSON.message));
+            }).fail((e) => reject(e));
         });
 
         const crudKey = (object, action) => (object && action) ? `${object}.${action}` : '';
