@@ -78,12 +78,14 @@
           const action =  $('#node-input-action');
           action.empty();
           actionOptions.forEach(option => {
-            const key = `${object}.${option.toLowerCase()}`;
+            const key = crudKey(object, option);
             getDefinitions(key).then(schema => {
               const { params } = schema || {};
                 if (Array.isArray(params)) {
                   action.append("<option value='" + option.toLowerCase() +"'>" + option + "</option>");
                 }
+            }).catch(e => {
+              console.log(`Can not get schema with key = ${key}`);
             });
           });
         }
@@ -103,7 +105,7 @@
             }).fail((e) => reject(e));
         });
 
-        const crudKey = (object, action) => (object && action) ? `${object}.${action}` : '';
+        const crudKey = (object, action) => (object && action) ? `${object}.${action.toLowerCase()}` : '';
         const crudDataNode = () => $("#input-for-crud-data");
         const getCrudData = (key) => crudDataNode().data(key);
         const setCrudData = (key, data) => crudDataNode().data(key, data);
