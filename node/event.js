@@ -137,7 +137,7 @@ module.exports = function (RED) {
     };
 
     apiUtil
-      .subscribeEvents(this.event, this.type, this.app, this.nodeUrl)
+      .subscribeEvents(this.event_name, this.event_type, this.app, this.nodeUrl)
       .then(subscriptionId => {
         this.subscriptionId = subscriptionId;
         RED.httpNode.post(
