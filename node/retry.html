@@ -1,0 +1,47 @@
+<script type="text/javascript">
+    RED.nodes.registerType('retry',{
+        category: 'aiWARE',
+        color: '#b3e5fc',
+        defaults: {
+            name: {value:""},
+            retryAttempts: {value:""},
+            attemptDelay: {value:""},
+
+        },
+        inputs: 1,
+        inputLabels: ["in"],
+        outputs: 2,
+        outputLabels: ["out", "error"],
+        icon: "veritone-logo-transparent.png",
+        paletteLabel: "retry",
+        label: function() {
+            return this.name || "retry";
+        },
+        oneditprepare: function () {
+            
+        },
+        oneditsave: function () {
+
+        },
+    });
+</script>
+
+<script type="text/x-red" data-template-name="retry">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-retryAttempts">Retry Attempts</label>
+        <input type="text" id="node-input-retryAttempts">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-attemptDelay">Attempt Delay</label>
+        <input type="text" id="node-input-attemptDelay" placeholder="seconds">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="retry">
+</script>
