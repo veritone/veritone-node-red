@@ -41,7 +41,8 @@
       "aiware-objects": "node/aiware-objects.js",
       "tensorflow-posenet": "node/tensorflow-posenet.js",
       "postgres-remote": "node/postgres-remote.js",
-      "media-merging": "node/media-merging.js"
+      "media-merging": "node/media-merging.js",
+      "retry": "node/retry.js"
     }
   }
 }
