@@ -1,0 +1,140 @@
+<script type="text/x-red" data-template-name="aiware-clipping">
+    <div class="form-row">
+        <label for="node-input-tdoId"> tdo ID </label>
+        <input type="string" id="node-input-tdoId" style="width:70%">
+        <input type="hidden" id="node-input-tdoIdType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-startOffsetMs">Start offset Ms</label>
+        <input type="string" id="node-input-startOffsetMs" style="width:70%">
+        <input type="hidden" id="node-input-startOffsetMsType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-endOffsetMs">End offset Ms</label>
+        <input type="string" id="node-input-endOffsetMs" style="width:70%">
+        <input type="hidden" id="node-input-endOffsetMsType">
+    </div>
+    <div id="input-engine-category"></div>
+</script>
+
+<script type="text/x-red" data-help-name="aiware-clipping">
+<p>Media clipping</p>
+<h3>Inputs</h3>
+<dl class="message-properties">
+    
+</dl>
+<h3>Outputs</h3>
+<ol class="node-ports">
+
+</ol>
+<h3>Details</h3>
+<ul>
+</ul>
+</script>
+
+<script type="text/javascript">
+    (function () {
+      function getAndCache(url) {
+            var cache = null;
+            return function (done) {
+                if (cache) {
+                    done(cache);
+                    return;
+                }
+                $.getJSON(url, function (data) {
+                    if (data) { cache = data; }
+                    done(data);
+                }, console.log);
+            }
+        }
+        var getEngineCategories = getAndCache("/veritone/engineCategories");
+
+        function newLoadingNode(text) {
+            return $(`<div>${text} <i class="fa fa-spinner"></i></div>`);
+        }
+
+        function findById(data, id) {
+            var i, d;
+            for (i = 0; i < data.length; i++) {
+                if (data[i].id === id) {
+                    return data[i];
+                }
+            }
+            return null;
+        }
+
+        function newSelectNode(data, title) {
+            var node = $("<select id='node-input-engineCategoryId' multiple style='height: 150px; width: 71%'></select>");
+            node.append(
+                $("<option disabled value=''> -- " + title + " -- </option>")
+                  .attr("selected", "selected")
+            );
+            $.each(data, function (index, s) {
+                node.append(
+                    $("<option value='" + s.id + "'>" + s.name + "</option>")
+                );
+            });
+            return node;
+        }
+
+        function showEngineCategoryForm(engineCategoryId) {
+            var loading = newLoadingNode("Loading engine category");
+            $("#input-engine-category").append(loading);
+            getEngineCategories(function (data) {
+                var engineCategoryInput = newSelectNode(data, "Select engine category");
+                var engineCategoryForm = $(`<div class="form-row"></div>`).append(
+                    `<label for="node-input-engineCategoryId"><i class="fa fa-cogs"></i> Category</label>`,
+                    engineCategoryInput
+                );
+                loading.remove();
+                $("#input-engine-category").append(engineCategoryForm);
+                $("#input-engine-category").append("<input type='hidden' id='node-input-engineCategoryIdType' value='str'>");
+                engineCategoryInput.val(engineCategoryId);
+                engineCategoryInput.change();
+            });
+        }
+
+        RED.nodes.registerType('aiware-clipping', {
+            category: 'aiWARE',
+            color: "#b3e5fc",
+            defaults: {
+              tdoId: { value: "", validate: RED.validators.typedInput("tdoIdType") },
+              tdoIdType: { value: "str" },
+              startOffsetMs: { value: "", validate: RED.validators.typedInput("startOffsetMsType") },
+              startOffsetMsType: { value: "str" },
+              endOffsetMs: { value: "", validate: RED.validators.typedInput("endOffsetMsType") },
+              endOffsetMsType: { value: "str" },
+              engineCategoryId: { value: "" },
+              engineCategoryIdType: { value: "str" },
+            },
+            inputs: 1,
+            outputs: 2,
+            outputLabels: ["result", "error"],
+            icon: "veritone-logo-transparent.png",
+            paletteLabel: "aiware-clipping",
+            label: function () {
+                return this.name || "aiware clipping";
+            },
+            oneditprepare: function () {
+              var that = this;
+              var fields = ["tdoId", "startOffsetMs", "endOffsetMs"];
+              $.each(fields, function (index, field) {
+                  $("#node-input-" + field + "Type").val(that[field + "Type"]);
+                  $("#node-input-" + field).typedInput({
+                      default: 'str',
+                      typeField: $("#node-input-" + field + "Type"),
+                      types: ['str', 'msg']
+                  });
+              });
+              showEngineCategoryForm(that.engineCategoryId);
+            },
+            oneditsave: function () {
+              var that = this;
+              var fields = ["tdoId", "startOffsetMs", "endOffsetMs", "engineCategoryId"];
+              $.each(fields, function (index, field) {
+                  that[field + "Type"] = $("#node-input-" + field + "Type").val();
+              });
+            }
+        });
+    })();
+</script>
