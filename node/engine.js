@@ -1,6 +1,7 @@
 const { NewVeritoneAPI, GetUserAgent } = require('../lib/graphql');
 const { NewOutput } = require('../lib/output');
 const mustache = require("mustache");
+const { get } = require('lodash');
 
 const render = (tmpl, obj) => mustache.render(tmpl, obj);
 
@@ -41,13 +42,19 @@ async function createJob(api, targetId, tasks) {
     return res;
 }
 
+const fieldValue = (config, field, msg) => {
+  const value = config[field];
+  const isStr = config[`${field}Type`] === 'str';
+  return isStr ? value : get(msg, value);
+};
+
 function CreateNode(RED, node, config) {
-    const { targetId: targetIdTmpl, tasks: tasksConfig } = config;
+    const { tasks: tasksConfig } = config;
     const tasks = tasksConfig.map(({ engineId }) => ({ engineId }));
     node.on("input", function (msg) {
         const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
-        const targetId = render(targetIdTmpl, msg);
+        const targetId = render(fieldValue(config, 'targetId', msg), msg);
         createJob(api, targetId, tasks).then(onSuccess).catch(onError);
     });
 }

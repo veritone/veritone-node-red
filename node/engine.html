@@ -1,15 +1,17 @@
 <script type="text/x-red" data-template-name="ai-processing">
-    <div class="form-row" id="input-targetId">
-        <label for="node-input-targetId"><i class="fa fa-hashtag"></i> Media ID</label>
-        <input type="text" id="node-input-targetId" placeholder="UUID">
-    </div>
-    <div id="input-engine-tasks"></div>
-    <button id="btn-add-engine-task">Add task</button>
-    <hr/>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row" id="input-targetId">
+        <label for="node-input-targetId"><i class="fa fa-hashtag"></i> Media ID</label>
+        <input type="text" id="node-input-targetId" placeholder="UUID" style="width:70%">
+        <input type="hidden" id="node-input-targetIdType">
+    </div>
+    <div id="input-engine-tasks"></div>
+    <button id="btn-add-engine-task">Add task</button>
+    <hr/>
+    
 </script>
 
 <script type="text/x-red" data-help-name="ai-processing">
@@ -223,6 +225,7 @@
             defaults: {
                 name: { value: "" },
                 targetId: { value: "", required: true },
+                targetIdType: { value: "str" },
                 tasks: { value: [] }
             },
             inputs: 1,
@@ -235,6 +238,12 @@
                 return this.name || "ai-processing";
             },
             oneditprepare: function () {
+                $("#node-input-targetIdType").val(this["targetIdType"]);
+                $("#node-input-targetId").typedInput({
+                    default: 'str',
+                    typeField: $("#node-input-targetIdType"),
+                    types: ['str', 'msg']
+                });
                 var tasks = [];
                 var taskListNode = $("#input-engine-tasks");
                 var addTaskButton = $("#btn-add-engine-task");
@@ -275,6 +284,7 @@
                 setButtonVisibility();
             },
             oneditsave: function () {
+                this["targetIdType"] = $("#node-input-targetIdType").val();
                 var taskListNode = $("#input-engine-tasks");
                 var tasks = taskListNode.data("tasks");
                 if (tasks) {
