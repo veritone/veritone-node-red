@@ -45,7 +45,8 @@ async function createJob(api, targetId, tasks) {
 const fieldValue = (config, field, msg) => {
   const value = config[field];
   const isStr = config[`${field}Type`] === 'str';
-  return isStr ? value : get(msg, value);
+  // if targetId Type is str, we render the template, if it is msg, we use lodash to get the field's value
+  return isStr ? render(value, msg) : get(msg, value);
 };
 
 function CreateNode(RED, node, config) {
@@ -54,7 +55,7 @@ function CreateNode(RED, node, config) {
     node.on("input", function (msg) {
         const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
         const { onError, onSuccess } = NewOutput(node, msg);
-        const targetId = render(fieldValue(config, 'targetId', msg), msg);
+        const targetId = fieldValue(config, 'targetId', msg);
         createJob(api, targetId, tasks).then(onSuccess).catch(onError);
     });
 }
