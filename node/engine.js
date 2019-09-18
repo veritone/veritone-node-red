@@ -19,7 +19,7 @@ async function getEngineCategories(api) {
 };
 
 async function getEnginesByCategory(api, categoryId) {
-    const query = `query { engines(categoryId: "${categoryId}", state: active) { 
+    const query = `query { engines(limit: 10000, offset: 0, categoryId: "${categoryId}", state: active) { 
     records { id name description rating price libraryRequired deploymentModel } 
 } }`;
     const { engines } = await api.Query(query);
