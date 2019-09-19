@@ -8,6 +8,11 @@
         <input type="text" id="node-input-targetId" placeholder="UUID" style="width:70%">
         <input type="hidden" id="node-input-targetIdType">
     </div>
+    <div class="form-row" id="input-targetId">
+        <label for="node-input-engineIds"><i class="fa fa-hashtag"></i> Engine IDs</label>
+        <input type="text" id="node-input-engineIds" placeholder="UUID" style="width:70%">
+        <input type="hidden" id="node-input-engineIdsType">
+    </div>
     <div id="input-engine-tasks"></div>
     <button id="btn-add-engine-task">Add task</button>
     <hr/>
@@ -226,6 +231,8 @@
                 name: { value: "" },
                 targetId: { value: "", required: true },
                 targetIdType: { value: "str" },
+                engineIds: { value: []},
+                engineIdsType: { value: "msg" },
                 tasks: { value: [] }
             },
             inputs: 1,
@@ -243,6 +250,11 @@
                     default: 'str',
                     typeField: $("#node-input-targetIdType"),
                     types: ['str', 'msg']
+                });
+                $("#node-input-engineIds").typedInput({
+                    default: 'msg',
+                    typeField: $("#node-input-engineIdsType"),
+                    types: ['msg']
                 });
                 var tasks = [];
                 var taskListNode = $("#input-engine-tasks");
@@ -285,6 +297,7 @@
             },
             oneditsave: function () {
                 this["targetIdType"] = $("#node-input-targetIdType").val();
+                this["engineIdsType"] = $("#node-input-engineIdsType").val();
                 var taskListNode = $("#input-engine-tasks");
                 var tasks = taskListNode.data("tasks");
                 if (tasks) {

@@ -50,10 +50,12 @@ const fieldValue = (config, field, msg) => {
 };
 
 function CreateNode(RED, node, config) {
-    const { tasks: tasksConfig } = config;
-    const tasks = tasksConfig.map(({ engineId }) => ({ engineId }));
     node.on("input", function (msg) {
         const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
+        const { tasks: tasksConfig } = config;
+        const engineIds = fieldValue(config, 'engineIds', msg) || [];
+        const tasksList = [...new Set(engineIds.concat(tasksConfig))];
+        const tasks = tasksList.map(({ engineId }) => ({ engineId }));
         const { onError, onSuccess } = NewOutput(node, msg);
         const targetId = fieldValue(config, 'targetId', msg);
         createJob(api, targetId, tasks).then(onSuccess).catch(onError);
