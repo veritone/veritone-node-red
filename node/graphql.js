@@ -9,7 +9,14 @@ function CreateNode(RED, node, config) {
         const syntax = msg.syntax || config.syntax;
         const query = (syntax === "mustache") ? mustache.render(template, msg) : template;
         const { onError, onSuccess } = NewOutput(node, msg);
-        api.Query(query, msg.variables).then(onSuccess).catch(onError);
+        // Support multiple/bulk GQL query
+        // 1. output 1 is data if success: response.data.data
+        // 2. output 2 is errors if exits: response.data.errors
+        const onMulErrors = (res) => { 
+            onError(res)
+            if (res.response.data.data) onSuccess(res.response.data.data)
+        }
+        api.Query(query, msg.variables).then(onSuccess).catch(onMulErrors);
     });
 }
 
