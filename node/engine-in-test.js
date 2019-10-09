@@ -40,10 +40,10 @@ function registerHttpEndpoints(RED) {
                 const msgid = RED.util.generateId();
                 res._msgid = msgid;
                 const msgPayload = req.body;
-                const taskPayload = msgPayload.taskPayload || {};
+                // const taskPayload = msgPayload.taskPayload || {};
                 const { customFields = [] } = node.config || {};
                 customFields.forEach(field => {
-                    taskPayload[field.key] = field.value;
+                    msgPayload[field.key] = field.value;
                 });
                 const msg = {
                     _msgid: msgid, req: req,
