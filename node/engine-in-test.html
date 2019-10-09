@@ -40,6 +40,10 @@
         padding: 0 6px;
         margin: 6px 0;
     }
+
+    .remove-feild {
+        cursor: pointer;
+    }
 </style>
 
 <script type="text/x-red" data-help-name="engine-in-test">
@@ -139,7 +143,7 @@
             function showField(index, field) {
                 var fieldKeyNode = $("<input type='text' style='width:100%'>").val(field.key);
                 var fieldValueNode = $("<input type='text' style='width:100%'>").val(field.value);
-                var removeButton = $(`<i class="fa fa-trash"></i>`);
+                var removeButton = $(`<i class="fa fa-trash remove-feild"></i>`);
                 var fieldNode = $(`<tr></tr>`).append(
                     $('<td></td>').append(fieldKeyNode),
                     $('<td></td>').append(fieldValueNode),
