@@ -12,7 +12,7 @@ async function userLogin(api, input) {
 function CreateNode(RED, node, config) {
 	const { userName, password } = config;
 	node.on("input", function (msg) {
-		const api = NewVeritoneAPI(RED.log.debug, GetUserAgent(config), msg);
+		const api = NewVeritoneAPI(RED, node, msg);
 		const { onError, onSuccess } = NewOutput(node, msg);
 		const input = { userName, password };
 		userLogin(api, input).then(onSuccess).catch(onError);
