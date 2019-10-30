@@ -12,11 +12,9 @@ function CreateNode(RED, node, config) {
         // Support multiple/bulk GQL query
         // 1. output 1 is data if success: response.data.data
         // 2. output 2 is errors if exits: response.data.errors
-        const onMulErrors = (res) => { 
-            onError(res)
-            if (res.response.data.data) onSuccess(res.response.data.data)
-        }
-        api.Query(query, msg.variables).then(onSuccess).catch(onMulErrors);
+
+        // revert back to previous revision
+        api.Query(query, msg.variables).then(onSuccess).catch(onError);
     });
 }
 
