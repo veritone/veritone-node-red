@@ -3,9 +3,8 @@
     category: 'aiWARE',
     color: "#b3e5fc",
     defaults: {
-      name: {
-        value: ""
-      },
+      name: { value: "" },
+      statusCode: { value: 200 }
     },
     inputs: 1,
     outputs: 0,
@@ -13,17 +12,21 @@
     align: "right",
     paletteLabel: "engine out",
     label: function () {
-      return this.name || "engine out";
+      return `${this.name || "engine out"} [${this.statusCode || 200}]`;
     }
   });
 </script>
 
 <script type="text/x-red" data-template-name="engine-out">
   <div class="form-row">
-          <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-          <input type="text" id="node-input-name" placeholder="Name">
-      </div>
-  </script>
+      <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+  <div class="form-row">
+    <label for="node-input-statusCode"><i class="icon-number"></i> Status Code</label>
+    <input type="text" id="node-input-statusCode" placeholder="200">
+  </div>
+</script>
 
 <script type="text/x-red" data-help-name="engine-out">
   <p>
