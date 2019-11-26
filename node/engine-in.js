@@ -1,5 +1,9 @@
 const bodyParser = require("body-parser");
+const multer = require('multer');
 const { RemoveNodeRedRoute } = require('../lib/http');
+const upload = multer({ storage: multer.memoryStorage() }).fields([
+    { name: 'chunk', maxCount: 1 }
+]);
 
 function CreateNode(RED, node, config) {
     if (!RED.settings.httpNodeRoot) {
@@ -16,10 +20,13 @@ function CreateNode(RED, node, config) {
         const _msgid = RED.util.generateId();
         const { body } = req;
         const msg = { _msgid, res, payload: body };
+        if (req.files && Array.isArray(req.files.chunk) && req.files.chunk[0]) {
+            msg.chunk = get(req.files.chunk[0].buffer);
+        }
         RED.log.vtn({ _msgid, body }, { node });
         node.send(msg);
     }
-    RED.httpNode.post(uri, jsonParser, formParser, handler, errorHandler);
+    RED.httpNode.post(uri, jsonParser, formParser, upload, handler, errorHandler);
     node.on('close', () => {
         RemoveNodeRedRoute(RED, uri);
     });
