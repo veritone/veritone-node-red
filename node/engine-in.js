@@ -1,9 +1,7 @@
 const bodyParser = require("body-parser");
 const multer = require('multer');
 const { RemoveNodeRedRoute } = require('../lib/http');
-const upload = multer({ storage: multer.memoryStorage() }).fields([
-    { name: 'chunk', maxCount: 1 }
-]);
+const upload = multer({ storage: multer.memoryStorage() }).any();
 
 function CreateNode(RED, node, config) {
     if (!RED.settings.httpNodeRoot) {
@@ -11,7 +9,6 @@ function CreateNode(RED, node, config) {
         return;
     }
 
-    const uri = `/process`;
     const maxApiRequestSize = RED.settings.apiMaxLength || '5mb';
     const jsonParser = bodyParser.json({ limit: maxApiRequestSize });
     const formParser = bodyParser.urlencoded({ extended: true, limit: maxApiRequestSize });
@@ -19,16 +16,27 @@ function CreateNode(RED, node, config) {
     const handler = (req, res) => {
         const _msgid = RED.util.generateId();
         const { body } = req;
-        const msg = { _msgid, res, payload: body };
-        if (req.files && Array.isArray(req.files.chunk) && req.files.chunk[0]) {
-            msg.chunk = get(req.files.chunk[0].buffer);
+        res._res = res;
+        const msg = { _msgid, req, res, payload: body };
+        if (req.files && Array.isArray(req.files) && req.files[0]) {
+            msg.chunk = req.files[0].buffer;
         }
-        RED.log.vtn({ _msgid, body }, { node });
+        // overwrite the url and orgToken
+        if (body.veritoneApiBaseUrl && body.token) {
+            msg.url = body.veritoneApiBaseUrl;
+            msg.orgToken = body.token;
+        }
+        RED.log.vtn({ _msgid, ...body }, { node });
         node.send(msg);
     }
+    const uri = `/process`;
+    // support multiple flows on a single node-red instance
+    const uri_unique = `/process/${node.id}`;
     RED.httpNode.post(uri, jsonParser, formParser, upload, handler, errorHandler);
+    RED.httpNode.post(uri_unique, jsonParser, formParser, upload, handler, errorHandler);
     node.on('close', () => {
         RemoveNodeRedRoute(RED, uri);
+        RemoveNodeRedRoute(RED, uri_unique);
     });
 };
 
